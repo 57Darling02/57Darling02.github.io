@@ -2,22 +2,20 @@
     <div class="toc-card a-card">
         <i class="fas fa-columns" />
         <span class="toc-title" style="font-weight: 600;">目录导航</span>
-        <el-anchor v-if="currentPost?.headings?.length"
-          :container="scrollContainer"
-          direction="vertical"
-          type="underline"
-          :offset="30"
-          @click="handleClick"
-          style="background-color: transparent;"
-        >
-          <el-anchor-link v-for="heading in currentPost.headings" :href="heading.anchor" :title="heading.text" />
-          
-        </el-anchor>
+
+        <el-scrollbar style="height: calc(80vh - 4rem);">
+            <el-anchor v-if="currentPost?.headings?.length" :container="scrollContainer" direction="vertical"
+                type="underline" :offset="30" @click="handleClick" style="background-color: transparent;">
+                <el-anchor-link v-for="heading in currentPost.headings" :href="heading.anchor" :title="heading.text" />
+
+            </el-anchor>
+        </el-scrollbar>
+
     </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted} from 'vue'
+import { computed, ref, onMounted } from 'vue'
 
 // 通用工具函数
 const normalizeLink = link => link.replace(/\.(md|html)$/, '')
@@ -49,7 +47,7 @@ const currentPost = computed(() =>
 )
 
 const handleClick = (e) => {
-  e.preventDefault()
+    e.preventDefault()
 }
 onMounted(() => {
     scrollContainer.value = getScrollContainer()
@@ -65,7 +63,7 @@ onMounted(() => {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 1rem;
     max-height: 80vh;
-    overflow-y: hidden;
+    overflow-y: auto;
 }
 
 .toc-title {

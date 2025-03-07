@@ -77,13 +77,12 @@ onMounted(() => {
       </div>
     </template>
     <template #sidebar-non-stay>
+    </template>
+    <template #sidebar-stay>
       <profieldcard />
       <div class="a-card vp-doc">
         <moreFuc />
       </div>
-    </template>
-    <template #sidebar-stay>
-      <profieldcard />
     </template>
   </MainLayout>
   <MainLayout v-else>
@@ -106,8 +105,8 @@ onMounted(() => {
     </template>
     <template #sidebar-stay>
       <tocCard :posts="posts" :currentUrl="page.relativePath" />
-      <div class="vp-doc" v-for="post in posts" :key="post.link">
-        <articleCardmini :post="post" />
+      <div class="a-card vp-doc">
+        <moreFuc />
       </div>
     </template>
   </MainLayout>

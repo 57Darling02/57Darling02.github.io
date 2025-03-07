@@ -26,10 +26,10 @@
 import { computed } from 'vue'
 import { useData } from 'vitepress'
 
-const { frontmatter } = useData()
+const { frontmatter,theme } = useData()
 const {
   title = "Untitled Article",
-  author = 'Anonymous',
+  author = theme.value?.defaultauthor || "Unknown Author",
   date = '',
 } = frontmatter.value
 

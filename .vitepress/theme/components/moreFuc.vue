@@ -2,27 +2,35 @@
     <el-collapse v-if="isClient" accordion>
         <el-collapse v-model="activeName" accordion>
             <el-collapse-item v-for="(item, index) in menuItems" :title="item.label" :name="index">
-
                 <div class="a-card" v-for="citem in item.children" @click="handleMenuClick(citem)">
-
                     <i :class="citem.icon"></i>
                     {{ citem.label }}
-
                 </div>
             </el-collapse-item>
+            <el-collapse-item title="鏂囩珷" :name="wz">
+                <el-scrollbar style="height: 800px">
+                    <div v-for="(post, index) in posts" :name="post.link">
+                    <articleCardmini :post="post" />
+                </div>
+                </el-scrollbar>
+                
+            </el-collapse-item>
+
         </el-collapse>
     </el-collapse>
 
 </template>
 <script setup>
+import articleCardmini from './article-cardmini.vue'
 import { useData } from 'vitepress'
-const { theme } = useData()
-import { ref,onMounted } from 'vue'
+const { theme, } = useData()
+import { ref, onMounted } from 'vue'
 const isClient = ref(false)
+import { data as posts } from '../utils/posts.data.js'
 const {
     menuItems = [
         {
-            label: '更多',
+            label: '鏇村',
             icon: 'fa-solid fa-list',
             children: [
                 {
@@ -57,7 +65,7 @@ const handleMenuClick = (item) => {
     }
 
     if (item.link) {
-        // 生成完整路径
+        // 鐢熸垚瀹屾暣璺緞
         const basePath = window.location.origin
         const fullPath = item.link.startsWith('/')
             ? `${basePath}${item.link}`
@@ -67,13 +75,13 @@ const handleMenuClick = (item) => {
             window.open(item.link, '_blank')
         }
         else {
-            window.open(fullPath, '_blank') // 保持新标签页打开行为
+            window.open(fullPath, '_blank') // 淇濇寔鏂版爣绛鹃〉鎵撳紑琛屼负
         }
     }
 }
 onMounted(() => {
-      isClient.value = true
-    })
+    isClient.value = true
+})
 </script>
 <style scoped>
 .a-card {

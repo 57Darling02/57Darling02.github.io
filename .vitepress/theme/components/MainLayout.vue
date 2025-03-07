@@ -18,22 +18,16 @@
                 <div id="content-container">
                     <div id="page-wrapper">
                         <slot name="main-content">
-                            <div class="a-card">
-                                content_slot
-                            </div>
+                            
                         </slot>
                     </div>
                     <div class="sidebar" v-if="isMounted">
                         <slot name="sidebar-non-stay">
-                            <div class="a-card">
-                                sidebar-non-stay
-                            </div>
+                            
                         </slot>
                         <div class="sidebar-stay">
                             <slot name="sidebar-stay">
-                                <div class="a-card">
-                                    sidebar-stay_slot
-                                </div>
+                                
                             </slot>
                         </div>
                     </div>
