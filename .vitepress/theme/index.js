@@ -5,7 +5,7 @@ import 'element-plus/dist/index.css'
 // 导入elementplus组件-中文
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import './fontawesome/css/all.min.css'
-
+import './css/index.css'
 
 /** @type {import('vitepress').Theme} */
 export default {
