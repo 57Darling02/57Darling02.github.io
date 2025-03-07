@@ -1,19 +1,16 @@
 // https://vitepress.dev/guide/custom-theme
 import Layout from './Layout.vue'
-import elementplus from "element-plus"
 import 'element-plus/dist/index.css'
-// 导入elementplus组件-中文
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
+// import 'element-plus/lib/theme-chalk/base.css'
 import './fontawesome/css/all.min.css'
-import './css/index.css'
+
 
 /** @type {import('vitepress').Theme} */
 export default {
   Layout,
-  enhanceApp({ app }) {
-    app.use(elementplus, {
-      locale: zhCn,
-    });
+  ignoreDeadLinks: true,
+  enhanceApp({ app, router, siteData }) {
+    // app.use(ElementPlus)
     const modules = import.meta.glob('./css/*.css', { eager: true });
     if (!import.meta.env.SSR) {
       for (const path in modules) {
@@ -22,6 +19,7 @@ export default {
         document.head.appendChild(style);
       }
     }
-  }
+  },
+  
 }
 

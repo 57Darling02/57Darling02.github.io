@@ -1,12 +1,12 @@
 import { defineConfig } from 'vitepress'
-
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "VitePress-Butterfly",
   description: "VitePress-Butterfly",
   head: [
-    ['link', { rel: 'stylesheet', href: '//unpkg.com/element-plus/dist/index.css' }],
-    ['script', { src: '//unpkg.com/element-plus' }],
     // 添加图标
     ['link', { rel: 'icon', href: '/favicon.ico' },
       {
@@ -123,17 +123,19 @@ export default defineConfig({
       copyright: "Copyright © 2025-present 57D02",
     },
   },
-  build: {
-    chunkSizeWarningLimit: 1500, // 将块大小警告限制提高到1.5MB
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // 将大依赖包单独分块
-          vue: ['vue', 'vue-router'],
-          vitepress: ['vitepress'],
-          markdown: ['markdown-it']
-        }
-      }
-    }
-  }
+  vite: {
+    ssr: {
+      noExternal: ['element-plus']
+    },
+    plugins: [
+      AutoImport({
+        resolvers: [ElementPlusResolver()],
+      }),
+      Components({
+        resolvers: [ElementPlusResolver()],
+      }),
+      
+    ], 
+  },
+  
 })

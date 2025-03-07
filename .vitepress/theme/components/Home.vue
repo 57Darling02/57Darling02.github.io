@@ -1,49 +1,36 @@
 <template>
     <div class="firstview">
         <h1 class="main-title">{{ mainTitle }}</h1>
-        <h2 class="subtitle">{{ typedText }}<span class="cursor">|</span></h2>
+        <!-- 添加multipleStrings类名 -->
+        <h2 class="subtitle multipleStrings"><span class="cursor">|</span></h2>
     </div>
 </template>
 
 <script setup>
-import { ref, watchEffect, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useData } from 'vitepress'
 const { theme } = useData()
+import TypeIt from 'typeit'
 const mainTitle = ref(theme.value.mainTitle)
 const subTitles = ref(theme.value.subTitles)
-const currentSubTitle = ref(0)
-const typedText = ref('')
-let isDeleting = false
-let timer
-
-const typeWriter = () => {
-    const fullText = subTitles.value[currentSubTitle.value]
-    if (isDeleting) {
-        typedText.value = fullText.substring(0, typedText.value.length - 1)
-    } else {
-        typedText.value = fullText.substring(0, typedText.value.length + 1)
+let typeitInstance = null
+onMounted(() => {
+  typeitInstance = new TypeIt('.subtitle', {
+    strings: subTitles.value,
+    speed: 100,
+    breakLines: false,
+    lifeLike: true,
+    loop: true,
+    cursor: {
+      autoStart: false, // 使用我们自己的光标样式
+      animation: { opacity: 0 }
     }
-
-    let typeSpeed = 150
-    if (isDeleting) typeSpeed = 75
-
-    if (!isDeleting && typedText.value === fullText) {
-        typeSpeed = 3000  // 保持时间从2秒增加到3秒
-        isDeleting = true
-    } else if (isDeleting && typedText.value === '') {
-        isDeleting = false
-        currentSubTitle.value = (currentSubTitle.value + 1) % subTitles.value.length
-    }
-
-    timer = setTimeout(typeWriter, typeSpeed)
-}
-
-watchEffect(() => {
-    clearTimeout(timer)
-    typeWriter()
+  }).go()
 })
 
-onUnmounted(() => clearTimeout(timer))
+onUnmounted(() => {
+  typeitInstance?.destroy()
+})
 </script>
 <style>
 .firstview {
