@@ -1,0 +1,66 @@
+@font-face {
+  font-family: 'AZY';
+  src: url('/font/ZhuZiAWan2.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* 确保添加这个属性 */
+}
+
+body {
+  margin: 0;
+  font-family: 'AZY', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    width: 100vw;
+  min-width: 300px;
+}
+
+
+:root {
+  --nav-height: 64px;
+  --sidebar-width: 300px;
+  --content-max-width: 1111px;
+  --content-min-width: 250px;
+  --sidebar-width: 300px;
+  --sidebar-initial-offset: -300px;
+}
+
+
+
+
+
+
+
+
+.a-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
+  outline: none;
+  margin-top: 10px;
+
+}
+
+.a-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+}
+
+
+#post-info {
+  height: 500px;
+  display: flex;
+  /* 垂直居中 */
+  align-items: center;
+  /* 水平居中 */
+  justify-content: center;
+  flex-direction: column;
+}
+
+.text a {
+  text-decoration: none;
+  color: #000;
+}
