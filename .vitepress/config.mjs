@@ -120,5 +120,18 @@ export default defineConfig({
       message: "VitePress",
       copyright: "Copyright © 2025-present 57D02",
     },
+  },
+  build: {
+    chunkSizeWarningLimit: 1500, // 将块大小警告限制提高到1.5MB
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 将大依赖包单独分块
+          vue: ['vue', 'vue-router'],
+          vitepress: ['vitepress'],
+          markdown: ['markdown-it']
+        }
+      }
+    }
   }
 })

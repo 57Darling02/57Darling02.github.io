@@ -100,9 +100,7 @@ onMounted(() => {
     </template>
     <template #sidebar-stay>
       <tocCard :posts="posts" :currentUrl="page.relativePath" />
-      <div class="vp-doc" v-for="post in posts" :key="post.link">
-        <articleCardmini :post="post" />
-      </div>
+      
     </template>
   </MainLayout>
 </template>
