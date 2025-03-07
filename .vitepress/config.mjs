@@ -5,6 +5,8 @@ export default defineConfig({
   title: "VitePress-Butterfly",
   description: "VitePress-Butterfly",
   head: [
+    ['link', { rel: 'stylesheet', href: '//unpkg.com/element-plus/dist/index.css' }],
+    ['script', { src: '//unpkg.com/element-plus' }],
     // 添加图标
     ['link', { rel: 'icon', href: '/favicon.ico' },
       {
