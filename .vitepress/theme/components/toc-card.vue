@@ -3,7 +3,7 @@
         <i class="fas fa-columns" />
         <span class="toc-title" style="font-weight: 600;">目录导航</span>
 
-        <el-scrollbar style="height: calc(80vh - 4rem);">
+        <el-scrollbar style="max-height: 500px;">
             <el-anchor v-if="currentPost?.headings?.length" :container="scrollContainer" direction="vertical"
                 type="underline" :offset="30" @click="handleClick" style="background-color: transparent;">
                 <el-anchor-link v-for="heading in currentPost.headings" :href="heading.anchor" :title="heading.text" />
