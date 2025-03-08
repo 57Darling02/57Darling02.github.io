@@ -8,7 +8,7 @@
                 </div>
             </el-collapse-item>
             <el-collapse-item title="文章" :name="wz">
-                <el-scrollbar style="height: 800px">
+                <el-scrollbar style="max-height: 500px">
                     <div v-for="(post, index) in posts" :name="post.link">
                     <articleCardmini :post="post" />
                 </div>
