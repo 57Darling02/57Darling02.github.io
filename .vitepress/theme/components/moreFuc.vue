@@ -2,10 +2,13 @@
     <el-collapse v-if="isClient" accordion>
         <el-collapse v-model="activeName" accordion>
             <el-collapse-item v-for="(item, index) in menuItems" :title="item.label" :name="index">
-                <div class="a-card" v-for="citem in item.children" @click="handleMenuClick(citem)">
+                <el-scrollbar style="height: 300px;">
+                    <div class="a-card" v-for="citem in item.children" @click="handleMenuClick(citem)">
                     <i :class="citem.icon"></i>
                     {{ citem.label }}
                 </div>
+                </el-scrollbar>
+                
             </el-collapse-item>
             <el-collapse-item title="文章" :name="wz">
                 <el-scrollbar style="height: 500px">
