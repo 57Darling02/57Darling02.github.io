@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import mathjax3 from 'markdown-it-mathjax3'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "VitePress-Butterfly",
@@ -134,8 +135,24 @@ export default defineConfig({
       Components({
         resolvers: [ElementPlusResolver()],
       }),
-      
     ], 
+    vue: {
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('mjx-')
+        }
+      }
+    }
+  },
+  markdown: {
+    config: (md) => {
+      md.use(mathjax3);
+    },
+    image: {
+      // 默认禁用；设置为 true 可为所有图片启用懒加载。
+      lazyLoading: true
+    }
   },
   
 })
+

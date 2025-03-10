@@ -10,7 +10,7 @@
                 </el-scrollbar>
                 
             </el-collapse-item>
-            <el-collapse-item title="文章" :name="wz">
+            <el-collapse-item title="文章" name="wz">
                 <el-scrollbar style="height: 500px">
                     <div v-for="(post, index) in posts" :name="post.link">
                         <articleCardmini :post="post" />

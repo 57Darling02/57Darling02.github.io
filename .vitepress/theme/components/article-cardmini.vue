@@ -38,7 +38,7 @@ const formattedDate = computed(() => {
 })
 </script>
 <template>
-    <div class="a-card">
+    <div class="a-card" style="padding: 15px;">
         <a :href="link" class="article-link">
             <!-- 标题部分 -->
             <el-text tag="h4" class="article-title" size="small" >{{ title }}</el-text>

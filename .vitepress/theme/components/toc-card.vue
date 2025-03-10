@@ -6,7 +6,7 @@
         <el-scrollbar style="height: 300px;">
             <el-anchor v-if="currentPost?.headings?.length" :container="scrollContainer" direction="vertical"
                 type="underline" :offset="30" @click="handleClick" style="background-color: transparent;">
-                <el-anchor-link v-for="heading in currentPost.headings" :href="heading.anchor" :title="heading.text" />
+                <el-anchor-link v-for="heading in currentPost.headings" :href="heading.anchor" :title="heading.text" :class="'toc-level-' + heading.level"/>
 
             </el-anchor>
         </el-scrollbar>
@@ -36,9 +36,9 @@ const scrollContainer = ref(null)
 const normalizedUrl = computed(() => {
     try {
         const url = new URL(props.currentUrl, location.origin)
-        return normalizeLink(decodeURIComponent(url.pathname)) // 新增解码处理
+        return normalizeLink(decodeURIComponent(url.pathname)) // 解码处理
     } catch {
-        return normalizeLink(decodeURIComponent(props.currentUrl.split('#')[0])) // 新增解码处理
+        return normalizeLink(decodeURIComponent(props.currentUrl.split('#')[0])) // 解码处理
     }
 })
 
@@ -51,7 +51,9 @@ const handleClick = (e) => {
 }
 onMounted(() => {
     scrollContainer.value = getScrollContainer()
+    console.log(currentPost.value.headings)
 })
+
 </script>
 
 <style scoped>
@@ -74,76 +76,34 @@ onMounted(() => {
     border-bottom: 1px solid #eee;
 }
 
-.toc-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-li {
-    border-radius: 5px;
-    color: #666;
-    text-decoration: none;
-    display: block;
-    padding: 6px;
-    transition: all 0.2s;
-    position: relative;
-    transition:
-        color 0.3s ease,
-        transform 0.3s ease,
-        padding-left 0.3s ease;
-
-    &:hover {
-        color: #42b983;
-        transform: translateX(4px);
-    }
-
-    &.active {
-        color: #fff;
-        font-weight: 500;
-        background-color: #6d6e6e;
-
-        &::before {
-            content: "";
-            position: absolute;
-            left: -8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 60%;
-            background: #42b983;
-            border-radius: 2px;
-        }
-    }
-}
-
-.toc-link.active::before {
-    transition: height 0.3s ease;
-}
-
-/* 层级缩进 */
-.toc-level-1 {
-    padding-left: 0.5rem
-}
 
 .toc-level-2 {
-    padding-left: 1.5rem
+    padding-left: 0;
 }
 
 .toc-level-3 {
-    padding-left: 2.5rem
+    padding-left: 0.5rem;
 }
 
 .toc-level-4 {
-    padding-left: 3.5rem
+    padding-left: 1.5rem;
 }
 
 .toc-level-5 {
-    padding-left: 4.5rem
+    padding-left: 2.5rem;
 }
 
 .toc-level-6 {
-    padding-left: 5.5rem
+    padding-left: 3.5rem;
+}
+
+/* 新增更高的层级支持 */
+.toc-level-7 {
+    padding-left: 4.5rem;
+}
+
+.toc-level-8 {
+    padding-left: 5.5rem;
 }
 
 .empty-tip {

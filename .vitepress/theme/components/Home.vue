@@ -2,7 +2,7 @@
     <div class="firstview">
         <h1 class="main-title">{{ mainTitle }}</h1>
         <!-- 添加multipleStrings类名 -->
-        <h2 class="subtitle multipleStrings"><span class="cursor">|</span></h2>
+        <h2 class="subtitle multipleStrings"></h2>
     </div>
 </template>
 
@@ -22,7 +22,7 @@ onMounted(() => {
     lifeLike: true,
     loop: true,
     cursor: {
-      autoStart: false, // 使用我们自己的光标样式
+      autoStart: true,
       animation: { opacity: 0 }
     }
   }).go()
@@ -50,45 +50,8 @@ onUnmounted(() => {
 .subtitle {
     font-size: 1.5rem;
     min-height: 2em;
-    color: white;
+    color: antiquewhite;
 }
 
-.cursor {
-    animation: blink 0.7s infinite;
-}
-
-@keyframes blink {
-
-    0%,
-    100% {
-        opacity: 1
-    }
-
-    50% {
-        opacity: 0
-    }
-}
-
-@keyframes typing {
-    from {
-        width: 0
-    }
-
-    to {
-        width: 100%
-    }
-}
-
-@keyframes blink-caret {
-
-    from,
-    to {
-        border-color: transparent
-    }
-
-    50% {
-        border-color: #333
-    }
-}
 
 </style>
