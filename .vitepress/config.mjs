@@ -3,6 +3,10 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import mathjax3 from 'markdown-it-mathjax3'
+const customElements = [
+  'mjx-container', 'mjx-assistive-mml', 'math', 'maction', 'maligngroup', 
+  // ...其他MathJax相关标签（参考摘要1中的完整列表）
+];
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "VitePress-Butterfly",
@@ -139,7 +143,7 @@ export default defineConfig({
     vue: {
       template: {
         compilerOptions: {
-          isCustomElement: (tag) => tag.startsWith('mjx-')
+          isCustomElement: (tag) => customElements.includes(tag),
         }
       }
     }
