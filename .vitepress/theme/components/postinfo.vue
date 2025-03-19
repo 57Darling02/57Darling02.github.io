@@ -56,6 +56,8 @@ const formattedDate = computed(() => {
   border-color: rgba(228, 195, 195, 0.13);
   background-color: transparent;
   display: flex;
+  animation: fadeInUp 1s ease-in-out 0.2s forwards;
+  opacity: 0;
 }
 
 #header-title {

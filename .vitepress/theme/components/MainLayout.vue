@@ -104,6 +104,7 @@ onMounted(() => {
 #main-layout {
     position: relative;
     height: 100vh;
+    
 }
 
 #main-layout::before {

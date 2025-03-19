@@ -114,6 +114,7 @@ onMounted(() => {
 <style>
 * {
   --el-fill-color-blank: transparent;
+
 }
 
 .fade-leave-active {
@@ -150,4 +151,5 @@ onMounted(() => {
 .fade-leave-active {
   transition: opacity 0.8s ease-out;
 }
+
 </style>
