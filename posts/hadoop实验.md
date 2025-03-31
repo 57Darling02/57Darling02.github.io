@@ -108,7 +108,7 @@ sudo vi /etc/ssh/sshd_config
 
 ​    改好之后:wq保存
 
-![img](https://i-blog.csdnimg.cn/blog_migrate/a8a17f8a4b4ed7161dffb833b47834b9.png)
+![image-20250331225825642](https://resource-un4.pages.dev/article/image-20250331225825642.png)
 
 设置ssh的root用户登入密码
 
@@ -132,7 +132,9 @@ sudo service ssh restart
 
 #### 修改主机名
 
-`sudo vim /etc/hostname` 
+```
+sudo vim /etc/hostname
+```
 
 输入i进入修改模式,修改`Master`后保存退出`esc   :wq`
 
