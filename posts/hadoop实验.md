@@ -90,6 +90,42 @@ sudo netplan --debug apply
 
 [Linux虚拟机配置ssh远程连接详细步骤(保姆级教程)_虚拟机安装ssh-CSDN博客](https://blog.csdn.net/m0_64655190/article/details/130569010)
 
+
+
+```
+sudo apt install openssh-server
+```
+
+```
+sudo service ssh restart
+```
+
+```
+sudo vi /etc/ssh/sshd_config 
+```
+
+去掉下图圈起来得“#”号，将prohibit-password改为yes。如果不该为yes，虚拟机是不允许root用户登录的。
+
+​    改好之后:wq保存
+
+![img](https://i-blog.csdnimg.cn/blog_migrate/a8a17f8a4b4ed7161dffb833b47834b9.png)
+
+设置ssh的root用户登入密码
+
+```
+sudo passwd root
+```
+
+设置高于8位。
+
+重启ssh服务
+
+```
+sudo service ssh restart
+```
+
+
+
 #### Java和hadoop下载
 
 应该不难，自行搜索即可
@@ -143,3 +179,12 @@ sudo netplan --debug apply
 输入`ip address`查看ip是否成功配置.
 
 环境配置完成。
+
+#### 修改主机名
+
+````
+sudo vim /etc/hostname
+````
+
+输入i进入修改模式,修改`Slaver001`后保存退出`esc   :wq`
+
