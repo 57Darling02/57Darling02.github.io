@@ -11,13 +11,21 @@ tags: 学习笔记
 
 搜索：网络连接
 
+![1743433331056](https://resource-un4.pages.dev/article/1743433331056.png)
+
 共享：已有的网络开启共享
 
 右键-状态-属性-共享-vmnet8
 
+![1743433436557](https://resource-un4.pages.dev/article/1743433436557.png)
+
+![1743433608428](https://resource-un4.pages.dev/article/1743433608428.png)
+
 确定vmnet8 ip:右键-状态-详细信息
 
-记录下ipv4和默认网关、DNS、子网掩码等
+![1743433669280](https://resource-un4.pages.dev/article/1743433669280.png)
+
+记录下ipv4和默认网关、DNS、子网掩码等，我的如下：
 
 192.168.137.1
 
@@ -29,15 +37,21 @@ tags: 学习笔记
 
 wmware中左上角：编辑-虚拟网络编辑器-更改设置（右下角）
 
+![1743433787184](https://resource-un4.pages.dev/article/1743433787184.png)
+
+![1743433955055](https://resource-un4.pages.dev/article/1743433955055.png)
+
 选中VMnet8 设置nat模式，关闭DHCP，设置子网ip
 
-![image-20250331212728719](https://resource-un4.pages.dev/article/image-20250331212728719.png)
+![1743434044704](https://resource-un4.pages.dev/article/1743434044704.png)
 
 192.168.137.0 （最后一位写0）
 
 进入net设置写入网关（前面记录的网关）
 
 在库中右键ubuntu打开设置-网络适配器-自定义-VMNet8
+
+![1743434104733](https://resource-un4.pages.dev/article/1743434104733.png)
 
 #### 虚拟机中
 
