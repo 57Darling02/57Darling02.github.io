@@ -5,7 +5,7 @@ tags: 学习笔记
 ---
 # hadoop实验
 
-说白了就是几个机器存一些文件，保证一个机器坏了文件不丢。大概的原理就是：使用多个能够互相通讯的主机，安装hadoop，其中一个为master,其他均为slaver。master统一管理数据请求。
+说白了就是几个机器存一些文件，保证一个机器坏了文件不丢。大概的原理就是：使用多个能够互相通讯的主机，安装hadoop，其中一个为master,其他均为slave。master统一管理数据请求。
 
 实验思路：建立几个能够互相通讯的虚拟机，实现分布式存储。
 
@@ -259,7 +259,7 @@ hadoop version
 
 **进一步配置hadoop**
 
-因为无论是Master还是Slaver，他们都要相同的hadoop配置，因此我们提前配置好再克隆，省的后面一个个配置。
+因为无论是Master还是slave，他们都要相同的hadoop配置，因此我们提前配置好再克隆，省的后面一个个配置。
 
 ```bash
 cd $HADOOP_HOME/etc/hadoop/
@@ -418,13 +418,13 @@ mkdir -p /opt/hadoop/data/{tmp,namenode,datanode}
 
 
 
-### 克隆Slaver
+### 克隆slave
 
-关闭Master主机，在wmware中链接克隆出Slaver001
+关闭Master主机，在wmware中链接克隆出slave001
 
 **克隆完成别急着打开。先配置mac地址。**
 
-在WMware station左侧库中右键打开克隆的虚拟机Slaver001的设置：网络适配器-高级-mac地址处-生成-保存。
+在WMware station左侧库中右键打开克隆的虚拟机slave001的设置：网络适配器-高级-mac地址处-生成-保存。
 
 打开克隆的虚拟机，配置信息中修改ipv4
 
@@ -472,17 +472,17 @@ sudo netplan --debug apply
 sudo vim /etc/hostname
 ````
 
-输入i进入修改模式,修改`Slaver001`后保存退出`esc   :wq`
+输入i进入修改模式,修改`slave001`后保存退出`esc   :wq`
 
 
 
-同理克隆出Slaver002 ip 104 ;Slaver003 ip 105
+同理克隆出slave002 ip 104 ;slave003 ip 105
 
  
 
 ### SSH免密
 
-Hadoop要求主节点（Master）能通过SSH无密码登录所有从节点（Slavers）。
+Hadoop要求主节点（Master）能通过SSH无密码登录所有从节点（slaves）。
 
 #### **步骤 1：生成SSH密钥对（所有节点）**
 
@@ -508,19 +508,19 @@ ssh-keygen -t rsa   # 一直按回车，默认不设密码
 	ssh-copy-id slave003
 	```
 
-- **验证**：从Master节点执行 `ssh slaver001`，确认无需密码即可登录。
+- **验证**：从Master节点执行 `ssh slave001`，确认无需密码即可登录。
 
 如果报错，可能需要删除旧的密钥
 
 ```bash
-ssh-keygen -R "slaver001"
+ssh-keygen -R "slave001"
 ```
 
 注意：强烈建议使用自己的用户名而不是root
 
 ### 配置分发
 
-再次同步Master的hadoop配置到slaver上
+再次同步Master的hadoop配置到slave上
 
 ```bash
 scp -r /opt/hadoop slave001:/opt/
@@ -557,7 +557,7 @@ export YARN_NODEMANAGER_USER=root
 
 或者切换到其他用户再执行一次ssh免密操作**（推荐）**
 
-进入三个slaver主机和master主机中执行：用户名替换为自己的用户名
+进入三个slave主机和master主机中执行：用户名替换为自己的用户名
 
 ```
 sudo chown -R zyjiang:zyjiang /opt/hadoop
