@@ -2,10 +2,10 @@
     <div class="toc-card a-card">
         <i class="fas fa-columns" />
         <span class="toc-title" style="font-weight: 600;">目录导航</span>
-        <el-anchor :current-node-key="currentAnchor" v-if="currentPost?.headings?.length" :container="scrollContainer" :offset="45"
+        <el-anchor v-if="currentPost?.headings?.length" :container="scrollContainer" :offset="45"
             direction="vertical" style="background-color: transparent;" :marker="false" @change="handleScroll" :select-scroll-top="true">
             <el-tree-v2 ref="treeRef" :height="300" style="max-width: 300px;" :indent="12" :data="treeData"
-                :props="treeProps" :expand-on-click-node="false">
+                :props="treeProps" :expand-on-click-node="false" :check-on-click-leaf="false" :highlight-current="true">
                 <template #default="{ node, data }">
                     <el-anchor-link :href="`${data.value}`" :title="data.label" :active="data.value === currentUrl">
                     </el-anchor-link>
@@ -58,7 +58,6 @@ const treeData = computed(() => {
     return result
 })
 const scrollContainer = ref(null)
-const currentAnchor = ref('')
 
 // 计算属性
 const normalizedUrl = computed(() => {
@@ -75,9 +74,16 @@ const currentPost = computed(() =>
 )
 
 const handleScroll = (e) => {
-    currentAnchor.value = e
-    treeRef.value?.scrollToNode(e,'smart')
-    // console.log(e)
+    treeRef.value?.setCurrentKey(e)
+    const currentNode = treeRef.value?.getCurrentNode()
+    const currentKey = treeRef.value?.getCurrentKey()
+    if (currentNode) {
+        // console.log('Current Node:', currentNode)
+        treeRef.value?.scrollToNode(currentNode,'smart')
+        treeRef.value?.setExpandedKeys([currentKey])
+    }
+    
+    // console.log(treeRef.value?.getCurrentKey())
 }
 onMounted(() => {
     scrollContainer.value = getScrollContainer()
@@ -93,6 +99,7 @@ onMounted(() => {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 3px;
+    padding: 1rem;
     overflow-y: hidden;
 }
 </style>

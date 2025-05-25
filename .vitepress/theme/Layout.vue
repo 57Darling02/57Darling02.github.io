@@ -5,7 +5,7 @@ import profieldcard from './components/profieldcard.vue';
 import NotFound from './components/NotFound.vue';
 import MainLayout from './components/MainLayout.vue';
 import articleCard from './components/article-card.vue';
-import articleCardmini from './components/article-cardmini.vue';
+import Loading from './components/Loading.vue';
 import Home from './components/Home.vue';
 import { ref, onMounted, watch } from 'vue'
 import postinfo from './components/postinfo.vue';
@@ -37,22 +37,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <transition name="fade">
-    <div v-if="!isMounted" class="loading-screen" :style="{
-      position: 'fixed',
-      zIndex: 9999,
-      background: 'white',
-      width: '100vw',
-      height: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }">
-      <div class="avatar-wrapper">
-        <img :src="avatar" :alt="name" class="avatar" @error="handleAvatarError">
-      </div>
-    </div>
-  </transition>
+  <Loading v-if="!isMounted"/>
   <keep-alive>
     <ClientOnly>
       <Starrysky />
@@ -114,42 +99,6 @@ onMounted(() => {
 <style>
 * {
   --el-fill-color-blank: transparent;
-
-}
-
-.fade-leave-active {
-  transition: opacity 0.5s;
-}
-
-.fade-leave-to {
-  opacity: 0;
-}
-
-.loading-screen {
-  animation: pulse 1.5s ease-in-out infinite;
-  background: var(--vp-c-brand);
-  opacity: 0.8;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 0.8;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.3;
-    transform: scale(0.98);
-  }
-
-  100% {
-    opacity: 0.8;
-    transform: scale(1);
-  }
-}
-
-.fade-leave-active {
-  transition: opacity 0.8s ease-out;
 }
 
 </style>

@@ -41,7 +41,7 @@ const formattedDate = computed(() => {
     <div class="a-card">
         <a :href="link" class="article-link">
             <!-- 标题部分 -->
-            <el-text tag="h3" class="article-title" size="large" :underline="false">{{ title }}</el-text>
+            <el-text tag="h3" class="article-title" size="large" style="text-decoration:none !important;">{{ title }}</el-text>
             <!-- 标签展示 -->
             <el-space wrap v-if="tags.length" class="tag-group">
                 <el-tag size="small" type="primary" effect="plain" round>
@@ -57,21 +57,20 @@ const formattedDate = computed(() => {
 
             <!-- 底部操作 -->
             <div class="card-footer">
-                <el-link type="primary" >
+                <el-link type="primary" :href="link">
                     阅读全文
                 </el-link>
             </div>
         </a>
     </div>
 </template>
-<style>
+<style scoped>
 .article-title {
     margin-bottom: 8px;
-    color: var(--el-color-primary) !important;
     max-width: 100%;
-    text-decoration:none
-}
+    text-decoration:none !important;
 
+}
 .article-excerpt {
     display: -webkit-box;
     -webkit-line-clamp: 2;

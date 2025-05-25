@@ -109,8 +109,8 @@ export default defineConfig({
   ],
   themeConfig: {
     // 首页配置
-    mainTitle: '57Darling02',
-    subTitles: ['全栈开发爱好者', '算法优化爱好者', '软件开发爱好者', '安卓与嵌入式开发爱好者'],
+    mainTitle: "57Darling02's Blog",
+    subTitles: ['如果你抑郁了，说明你活在过去', '如果你焦虑了，说明你活在未来', '如果你平静了，才说明你活在现在。'],
     defaultauthor: '57Darling02',
     // 网站顶部导航栏配置
     logo: "https://resource-un4.pages.dev/article/yjtp.webp",
@@ -122,7 +122,7 @@ export default defineConfig({
         children: [
           {
             key: 'action1',
-            label: 'BJTU课程平台se',
+            label: 'BJTU课程平台青春版',
             icon: 'fa-light fa-cloud',
             link: 'https://course.bjtu.top'
           },

@@ -16,7 +16,7 @@
     </div>
 </template>
 
-<style>
+<style scoped>
 .not-found {
   height: 100vh; /* 添加固定高度 */
   overflow: hidden; /* 隐藏溢出内容 */
@@ -30,7 +30,7 @@
   text-align: center;
   position: relative;
   padding: 2rem;
-  max-width: 90vw; /* 防止横向溢出 */
+  max-width: 90vw;
 }
 
 .not-found .glitch {
@@ -65,7 +65,8 @@
 .not-found .subtitle {
     font-size: 1.25rem;
     color: #a0a0c0;
-    margin: 1rem 0 3rem;
+    margin: 3.8rem 0 0rem;
+    
 }
 
 .not-found .home-btn {

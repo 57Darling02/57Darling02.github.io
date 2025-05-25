@@ -1,7 +1,6 @@
 <template>
     <div class="firstview">
         <h1 class="main-title">{{ mainTitle }}</h1>
-        <!-- 添加multipleStrings类名 -->
         <h2 class="subtitle multipleStrings"></h2>
     </div>
 </template>
