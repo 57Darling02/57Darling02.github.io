@@ -1,14 +1,7 @@
-@font-face {
-  font-family: 'AZY';
-  src: url('/font/ZhuZiAWan2.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap; /* 确保添加这个属性 */
-}
 
 body {
   margin: 0;
-  font-family: 'AZY', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
     width: 100vw;

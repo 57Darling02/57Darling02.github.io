@@ -1,15 +1,71 @@
 ---
-title: hadoop实验
+title: 分布式学习
 date: 2025-03-31 21:05:59
 tags: 学习笔记
 ---
-# hadoop实验
+# 分布式学习
 
-说白了就是几个机器存一些文件，保证一个机器坏了文件不丢。大概的原理就是：使用多个能够互相通讯的主机，安装hadoop，其中一个为master,其他均为slave。master统一管理数据请求。
+## 起源
 
-实验思路：建立几个能够互相通讯的虚拟机，实现分布式存储。
+​	在早期，数据量比较少，一台计算机就能轻松存下所有数据，就像一个小仓库能装下所有货物一样。
+
+**问题1：**
+
+​	但随着时间推移，数据量急剧增长，一台机器的存储空间远远不够，就好比小仓库装不下越来越多的货物了。而且，一旦这台机器出现故障，数据就可能丢失，这就像小仓库着火了，里面的货物都没了。
+
+![q1](./hadoop%E5%AE%9E%E9%AA%8C.assets/q1.gif)
+
+**解决1：**
+
+​	为了解决这个问题，人们想到用多台机器来存储数据，这样可以拓展存储空间，就像把货物分散存放在多个小仓库里。同时，为了防止某台机器故障导致数据丢失，还会对数据进行备份，就像给重要货物多准备几份副本存放在不同的小仓库。
+
+![image-20250525205236354](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525205236354.png)
+
+**问题2**
+
+​	虽然用多台机器存储数据解决了空间和容错问题，但手动管理这些机器和数据变得非常麻烦。比如，要备份数据时，得一台机器一台机器地操作；查找数据时，也得在不同机器中挨个寻找。就像要从多个小仓库里找一件货物，得一个个仓库去翻，效率很低。
+
+**解决2**
+
+​	没有什么是加一层中间层不能解决的。我们找到了开源分布软件hadoop，其核心的HDFS(Hadoop Flie System) 就像一个智能的仓库管理员，它在底层实现了机器的拓展和数据的备份。它会自动把大文件拆分成小块，分散存放在不同的机器上，并且会自动管理数据的副本。同时，它还提供了方便的数据查找功能，用户只需要告诉它要找什么数据，它就能快速定位到数据所在的机器，就像仓库管理员能快速告诉你货物存放在哪个小仓库一样。
+
+![image-20250525205720601](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525205720601.png)
+
+**问题3**
+
+​	但当要对这些数据进行处理时，比如进行数据统计分析，用户还得自己编写复杂的代码（如 MapReduce 程序）来对数据进行分片和处理。而且，不同的处理任务可能会同时竞争集群的资源，导致资源分配不合理，效率低下。比如分别统计AB数据和CD数据，三个计算机如果顺序执行就效率太低下了，如果并行又有可能抢着要同一个cpu，同一片内存。
 
 
+
+**解决3**
+
+​	没有什么是加一层中间层不能解决的,如果有，那就再加一层。为了解决这个问题，Yarn（Yet Another Resource Negotiator）出现了。Yarn 就像一个仓库的调度中心，它负责管理和调度集群中的计算资源。它会根据不同任务的需求，合理地分配 CPU、内存等资源，确保每个任务都能高效地运行。同时，它还支持多种计算框架，不同的计算任务都可以在 Yarn 的调度下使用集群资源。
+
+![image-20250525205835942](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525205835942.png)
+
+
+
+**问题4**
+
+​	但是问题又来了，就算这样，具体数据的处理逻辑仍然需要我们自己写代码处理，对于文件要怎么map分片，又怎么reduce聚合。编写复杂的 MapReduce 代码还是太累了。有没有办法解决呢？
+
+
+
+**解决4**
+
+​	没有什么是加一层中间层不能解决的,如果有，那就再加一层。Hive 就是为了解决这个问题而诞生的。Hive 类似一个翻译官，它允许用户使用类似 SQL 的语言（HiveQL）来查询和分析存储在 HDFS 中的数据。Hive 会把用户输入的 HiveQL 语句翻译成 MapReduce 或其他计算任务，然后提交给 Yarn 进行调度执行。这样，用户就不需要编写复杂的代码，只需要用熟悉的 SQL 语言就能完成数据处理任务。
+
+![image-20250525210017745](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525210017745.png)
+
+
+
+## 实验
+
+​	使用虚拟机模拟分布式存储与计算以学习和体会分布式数据的存储和分析。实验将模拟一些数据文件数据存入多个不同的虚拟机，通过hadoop统一管理数据，通过hive进行数据分析和处理。
+
+
+
+### 环境配置
 
 #### 1. 物理机中（win11为例）
 
@@ -19,19 +75,19 @@ tags: 学习笔记
 
 搜索：网络连接
 
-![1743433331056](https://resource-un4.pages.dev/article/1743433331056.png)
+![image-20250525211045923](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211045923.png)
 
 共享：已有的网络开启共享
 
 右键-状态-属性-共享-vmnet8
 
-![1743433436557](https://resource-un4.pages.dev/article/1743433436557.png)
+![image-20250525211100938](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211100938.png)
 
 ![1743433608428](https://resource-un4.pages.dev/article/1743433608428.png)
 
 确定vmnet8 ip:右键-状态-详细信息
 
-![1743433669280](https://resource-un4.pages.dev/article/1743433669280.png)
+![image-20250525211109113](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211109113.png)
 
 记录下ipv4和默认网关、DNS、子网掩码等，我的如下：
 
@@ -45,13 +101,13 @@ tags: 学习笔记
 
 wmware中左上角：编辑-虚拟网络编辑器-更改设置（右下角）
 
-![1743433787184](https://resource-un4.pages.dev/article/1743433787184.png)
+![image-20250525211126526](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211126526.png)
 
-![1743433955055](https://resource-un4.pages.dev/article/1743433955055.png)
+![image-20250525211130465](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211130465.png)
 
 选中VMnet8 设置nat模式，关闭DHCP，设置子网ip
 
-![1743434044704](https://resource-un4.pages.dev/article/1743434044704.png)
+![image-20250525211135798](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211135798.png)
 
 192.168.137.0 （最后一位写0）
 
@@ -59,7 +115,7 @@ wmware中左上角：编辑-虚拟网络编辑器-更改设置（右下角）
 
 在库中右键ubuntu打开设置-网络适配器-自定义-VMNet8
 
-![1743434104733](https://resource-un4.pages.dev/article/1743434104733.png)
+![image-20250525211141498](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211141498.png)
 
 #### 2.虚拟机中
 
@@ -69,7 +125,7 @@ wmware中左上角：编辑-虚拟网络编辑器-更改设置（右下角）
 
 `ip address`
 
-![image-20250331213853612](https://resource-un4.pages.dev/article/image-20250331213853612.png)
+![image-20250525211147607](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211147607.png)
 
 我的是ens33，如果你的不是，后面代码中的这个全部替换成你自己的网卡名字。
 
@@ -128,7 +184,7 @@ sudo vi /etc/ssh/sshd_config
 
 ​    改好之后:wq保存
 
-![image-20250331225825642](https://resource-un4.pages.dev/article/image-20250331225825642.png)
+![image-20250525211203189](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211203189.png)
 
 设置ssh的root用户登入密码
 
@@ -253,7 +309,7 @@ hadoop version
 
 成功如下：
 
-![image-20250401235722309](https://resource-un4.pages.dev/article/image-20250401235722309.png)
+![image-20250525211223205](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211223205.png)
 
 
 
@@ -277,9 +333,9 @@ sudo vi hadoop-env.sh
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ```
 
-jdk17还要修改一个选项
+jdk17默认不允许匿名函数反射，因此还要修改一个选项
 
-![image-20250402021651016](https://resource-un4.pages.dev/article/image-20250402021651016.png)
+![image-20250525211228080](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211228080.png)
 
 ```bash
 export HADOOP_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
@@ -626,7 +682,9 @@ start-all.sh
 stop-all.sh
 ```
 
-## mapreduce实验
+
+
+##  mapreduce实验
 
 ### 1. 安装 Python 3
 
@@ -997,7 +1055,7 @@ hdfs dfs -put ~/workspace/hivedata/peak_hours_AFC*.csv /input/afc/peak
 
 进入web端口检查一下
 
-![image-20250418153556782](https://resource-un4.pages.dev/article/image-20250418153556782.png)
+![image-20250525211318230](./hadoop%E5%AE%9E%E9%AA%8C.assets/image-20250525211318230.png)
 
 成功上传。
 
