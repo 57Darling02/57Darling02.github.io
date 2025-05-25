@@ -1,6 +1,6 @@
 <script setup>
 import { useData, useRouter } from 'vitepress'
-import Starrysky from './components/Starrysky.vue';
+import Starrysky from './components/Bg_StarrySkySass.vue';
 import profieldcard from './components/profieldcard.vue';
 import NotFound from './components/NotFound.vue';
 import MainLayout from './components/MainLayout.vue';
