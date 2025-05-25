@@ -526,6 +526,10 @@ ssh-keygen -R "slave001"
 scp -r /opt/hadoop slave001:/opt/
 scp -r /opt/hadoop slave002:/opt/
 scp -r /opt/hadoop slave003:/opt/
+
+scp /opt/hadoop/etc/hadoop/yarn-site.xml slave001:/opt/hadoop/etc/hadoop/
+scp /opt/hadoop/etc/hadoop/yarn-site.xml slave002:/opt/hadoop/etc/hadoop/
+scp /opt/hadoop/etc/hadoop/yarn-site.xml slave003:/opt/hadoop/etc/hadoop/
 ```
 
 
@@ -621,4 +625,772 @@ stop-dfs.sh
 start-all.sh
 stop-all.sh
 ```
+
+## mapreduce实验
+
+### 1. 安装 Python 3
+
+打开终端，执行以下命令更新软件包列表并安装 Python 3： 
+
+```
+sudo apt update sudo apt install python3
+```
+
+验证安装： 
+
+```bash
+ python3 --version
+```
+
+### 2. 创建并编辑 `test.txt` 创建工作目录并进入： 
+
+```bash 
+mkdir -p ~/workspace cd ~/workspace
+```
+
+使用文本编辑器创建 `test.txt` 并输入内容
+
+（例如每行写一些英文单词，用空格分隔）：
+
+```bash
+nano test.txt 
+```
+
+输入完成后，按 `Ctrl + X`，输入 `Y` 确认保存，按 `Enter` 确认文件名。
+
+### 3. 上传 `test.txt` 到 Hadoop 集群 
+
+确保 Hadoop 已配置且服务正常运行（若未启动，先执行 `$HADOOP_HOME/sbin/start-dfs.sh` 启动 HDFS）。
+创建 HDFS 输入目录并上传文件： 
+
+```bash 
+hdfs dfs -mkdir -p /input hdfs dfs -put test.txt /input
+```
+
+### 4. 编写并保存 `wordcount.py`
+
+将以下代码保存为 `wordcount.py`： 
+
+```python 
+# coding:utf-8 from mrjob.job 
+import MRJob class WordCount(MRJob):    
+def mapper(self, key, value):
+    words = str(value).split(" ")
+    for word in words:
+        yield word, 1
+def reducer(self, key, values):
+    yield key, sum(values)
+if __name__ == '__main__':
+    WordCount.run()
+```
+
+### 5. 运行 `mrjob` 任务 
+
+确保 Hadoop 集群服务（`HDFS` 和 `YARN`）已启动（执行 `$HADOOP_HOME/sbin/start-dfs.sh` 和 `$HADOOP_HOME/sbin/start-yarn.sh`）。
+在终端执行： 
+
+```bash
+cd ~/workspace/
+python3 wordcount.py -r hadoop hdfs:///input/test.txt -o hdfs:///output
+```
+
+- `-r hadoop`：指定在 Hadoop 集群上运行。 
+- `hdfs:///input/test.txt`：HDFS 中输入文件路径。
+- `-o hdfs:///output`：指定输出目录（输出目录不能存在，需提前确`hdfs:///output` 未创建）。
+
+### 6. 查看结果 
+
+任务执行完成后，查看 HDFS 输出目录中的结果：
+
+```bash 
+hdfs dfs -cat /output/part-00000
+```
+
+
+
+```bash
+sudo  scp /opt/hadoop/etc/hadoop/* slave001:/opt/hadoop/etc/hadoop
+sudo  scp /opt/hadoop/etc/hadoop/* slave002:/opt/hadoop/etc/hadoop
+sudo  scp /opt/hadoop/etc/hadoop/* slave003:/opt/hadoop/etc/hadoop
+```
+
+
+
+```
+sudo apt install openjdk-8-jdk
+sudo update-alternatives --config java
+ls /usr/lib/jvm | grep java-8-openjdk
+sta
+vi ~/.bashrc
+
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+
+source ~/.bashrc
+echo $JAVA_HOME
+sudo update-alternatives --config java
+```
+
+
+
+
+
+
+
+## hive安装
+
+安装在/opt/apache-hive-4.0.1-bin
+
+
+
+**配置**
+
+我的建议是：改好了直接cp进去
+
+```bash
+cp ~/hive-site.xml /opt/apache-hive-4.0.1-bin/conf/hive-site.xml
+```
+
+```xml
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <!-- ========== 元存储配置 ========== -->
+  <!-- MySQL 连接配置 -->
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:mariadb://master:3306/hive_metastore?createDatabaseIfNotExist=true</value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.mariadb.jdbc.Driver</value>
+  </property>
+  <!-- 数据库用户名和密码 -->
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>zyjiang</value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>psd</value>
+  </property>
+  <!-- ========== Hive 运行配置 ========== -->
+
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>/user/hive/warehouse</value>
+  </property>
+  <property>
+    <name>hive.exec.scratchdir</name>
+    <value>/tmp/hive</value>
+  </property>
+  <property>
+    <name>hive.server2.thrift.port</name>
+    <value>10000</value>
+  </property>
+  <property>
+    <name>hive.server2.thrift.bind.host</name>
+    <value>0.0.0.0</value>
+   </property>
+
+
+  <!-- 其他重要配置 -->
+  <!-- hiveserver2的高可用参数，如果不开会导致了开启tez session导致hiveserver2无法启动 -->
+ <property>
+    <name>hive.server2.active.passive.ha.enable</name>
+    <value>true</value>
+ </property>
+ <!--解决Error initializing notification event poll问题-->
+ <property>
+    <name>hive.metastore.event.db.notification.api.auth</name>
+    <value>false</value>
+ </property>
+</configuration>
+```
+
+配置修改
+
+```bash
+vi /etc/profile
+```
+
+新增
+
+```
+export HIVE_HOME=/opt/apache-hive-4.0.1-bin
+export HIVE_CLASSPATH=$HIVE_HOME/lib/*:$HIVE_HOME/conf
+```
+
+
+
+**hiveserver2配置**
+
+- hadoop-env.sh
+
+```bash
+vi $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+```
+
+（如果是jdk17）新增如下内容：
+
+```sh
+export HADOOP_CLIENT_OPTS="--add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED $HADOOP_CLIENT_OPTS"
+```
+
+修改hive-env.sh
+
+```xml
+# export HIVE_AUX_JARS_PATH=
+export HADOOP_HOME=/opt/hadoop  # 根据实际 Hadoop 安装路径修改
+export HIVE_CONF_DIR=/opt/apache-hive-4.0.1-bin/conf
+export HIVE_AUX_JARS_PATH=$HADOOP_HOME/share/hadoop/common/lib:$HADOOP_HOME/share/hadoop/hdfs/lib
+
+# 如果jdk17需要下面配置
+export HADOOP_OPTS="$HADOOP_OPTS --add-opens=java.base/java.net=ALL-UNNAMED"
+export HADOOP_OPTS="$HADOOP_OPTS --add-opens=java.base/java.lang=ALL-UNNAMED"
+export HADOOP_OPTS="$HADOOP_OPTS --add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED"
+export HADOOP_CLIENT_OPTS="--add-opens java.base/java.net=ALL-UNNAMED $HADOOP_CLIENT_OPTS"
+```
+
+
+
+- core-site.xml
+
+```bash
+vi $HADOOP_HOME/etc/hadoop/core-site.xml
+```
+
+新增如下内容：(不然待会连不上)
+
+```xml
+ <property>
+    <name>hadoop.proxyuser.zyjiang.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.zyjiang.groups</name>
+    <value>*</value>
+  </property>
+```
+
+
+
+**分发**
+
+```bash
+scp $HADOOP_HOME/etc/hadoop/core-site.xml slave001:$HADOOP_HOME/etc/hadoop/
+scp $HADOOP_HOME/etc/hadoop/core-site.xml slave002:$HADOOP_HOME/etc/hadoop/
+scp $HADOOP_HOME/etc/hadoop/core-site.xml slave003:$HADOOP_HOME/etc/hadoop/
+```
+
+
+
+**端口防火墙**
+
+```bash
+sudo ufw allow 10000
+sudo ufw reload
+```
+
+**初始化 Hive 元数据库**
+
+```bash
+schematool -dbType mysql -initSchema
+```
+
+
+
+ **停止服务**
+
+```bash
+pkill -f HiveServer2
+pkill -f HiveMetaStore
+```
+
+ **启动 HiveServer2 服务**
+
+```bash
+# 后台启动
+hive --service metastore > ~/logs/metastore.log 2>&1 &
+hive --service hiveserver2 > ~/logs/hiveserver2.log 2>&1 &
+```
+
+查看log
+
+```bash
+vi /tmp/zyjiang/hive.log
+```
+
+```bash
+grep "HADOOP_OPTS" ~/logs/hiveserver2.log
+```
+
+如果想在控制台看输出，使用下面的代替上面
+
+```bash
+hive --service metastore
+hive --service hiveserver2
+```
+
+**验证端口监听**
+
+```bash
+netstat -tuln | grep 10000
+```
+
+**检查进程**
+
+```bash
+jps
+ps -ef | grep "[h]iveserver2"
+```
+
+**连接 Beeline**
+
+```bash
+beeline -u "jdbc:hive2://master:10000" -n zyjiang
+```
+
+**验证**
+
+```bash
+beeline
+!connect jdbc:hive2://master:10000;
+```
+
+
+
+```bash
+beeline -u "jdbc:hive2://master:10000" -n zyjiang
+```
+
+
+
+------
+
+
+
+
+
+## hive实验：
+
+
+
+1. 创建Hive表，将本地csv文件导入到Hive表格，执行HiveQL查询（30分） 上传文件到hdfs，创建Hive表（5分） 将本地csv文件导入到Hive表格（10分） 执行HiveQL查询——根据csv数据筛选记录超过2次的常旅客（5分）、分小时进出站量（5分）、分小时OD量（5分） 
+
+2. 根据筛选结果，借助python等进行可视化并分析（10分 ）
+
+##### 数据准备
+
+将目标数据放入~/workspace/hivedata/文件夹中，上传至hdfs
+
+
+
+```bash
+hdfs dfs -mkdir  /input/afc/
+hdfs dfs -mkdir  /input/afc/normal
+hdfs dfs -mkdir  /input/afc/peak
+hdfs dfs -put ~/workspace/hivedata/AFC*.csv /input/afc/normal
+hdfs dfs -put ~/workspace/hivedata/peak_hours_AFC*.csv /input/afc/peak 
+```
+
+
+
+进入web端口检查一下
+
+![image-20250418153556782](https://resource-un4.pages.dev/article/image-20250418153556782.png)
+
+成功上传。
+
+
+
+### hive建立表
+
+```sql
+CREATE DATABASE IF NOT EXISTS afc;
+
+SHOW DATABASES;
+
+USE afc;
+
+CREATE EXTERNAL TABLE afc_peak (
+    `date` STRING,
+    passenger_id BIGINT,
+    ticket_type INT,
+    entry_station_id INT,
+    entry_timestamp STRING,
+    entry_line_id INT,
+    exit_station_id INT,
+    exit_timestamp STRING,
+    exit_line_id INT,
+    peak_type STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/input/afc/peak/'
+TBLPROPERTIES ('skip.header.line.count'='1');
+
+CREATE EXTERNAL TABLE afc_normal (
+    `date` STRING,
+    passenger_id BIGINT,
+    ticket_type INT,
+    entry_station_id INT,
+    entry_timestamp STRING,
+    entry_line_id INT,
+    exit_station_id INT,
+    exit_timestamp STRING,
+    exit_line_id INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/input/afc/normal/'
+TBLPROPERTIES ('skip.header.line.count'='1');
+
+SHOW TABLES;
+```
+
+
+
+此时我们可以看到：
+```sql
++-------------+
+|  tab_name   |
++-------------+
+| afc_normal  |
+| afc_peak    |
++-------------+
+
+```
+
+
+
+#### 执行HiveQL查询
+
+**连接 Beeline**
+
+```bash
+hive --service metastore > ~/logs/metastore.log 2>&1 &
+hive --service hiveserver2 > ~/logs/hiveserver2.log 2>&1 &
+beeline -u "jdbc:hive2://master:10000" -n zyjiang
+```
+
+
+
+#### 查询1：筛选记录超过2次的常旅客
+
+```sql
+SELECT passenger_id, COUNT(*) AS trip_count
+FROM afc_normal
+GROUP BY passenger_id
+HAVING trip_count > 2;
+```
+
+#### 查询2：分小时进出站量
+
+```sql
+SELECT hour, SUM(entry_count) AS total_entry, SUM(exit_count) AS total_exit
+FROM (
+    SELECT 
+        date_format(
+            from_unixtime(
+                unix_timestamp(
+                    regexp_replace(entry_timestamp, '^([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]):', '$1 0$2:'), 
+                    'yyyy/MM/dd HH:mm:ss'
+                )
+            ), 
+            'HH'
+        ) AS hour, 
+        1 AS entry_count, 
+        0 AS exit_count
+    FROM afc_normal
+    WHERE 
+        unix_timestamp(
+            regexp_replace(entry_timestamp, '^([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]):', '$1 0$2:'), 
+            'yyyy/MM/dd HH:mm:ss'
+        ) IS NOT NULL
+    UNION ALL
+    SELECT 
+        date_format(
+            from_unixtime(
+                unix_timestamp(
+                    regexp_replace(exit_timestamp, '^([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]):', '$1 0$2:'), 
+                    'yyyy/MM/dd HH:mm:ss'
+                )
+            ), 
+            'HH'
+        ) AS hour, 
+        0, 
+        1
+    FROM afc_normal
+    WHERE 
+        unix_timestamp(
+            regexp_replace(exit_timestamp, '^([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]):', '$1 0$2:'), 
+            'yyyy/MM/dd HH:mm:ss'
+        ) IS NOT NULL
+) combined
+GROUP BY hour
+ORDER BY hour;
+```
+
+#### 查询3：分小时OD量（按进站时间统计）
+
+```sql
+SELECT 
+    date_format(
+        from_unixtime(
+            unix_timestamp(
+                regexp_replace(entry_timestamp, '^([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]):', '$1 0$2:'), 
+                'yyyy/MM/dd HH:mm:ss'
+            )
+        ), 
+        'HH'
+    ) AS hour, 
+    entry_station_id, 
+    exit_station_id, 
+    COUNT(*) AS od_count
+FROM afc_normal
+WHERE 
+    unix_timestamp(
+        regexp_replace(entry_timestamp, '^([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]):', '$1 0$2:'), 
+        'yyyy/MM/dd HH:mm:ss'
+    ) IS NOT NULL
+GROUP BY 
+    date_format(
+        from_unixtime(
+            unix_timestamp(
+                regexp_replace(entry_timestamp, '^([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]):', '$1 0$2:'), 
+                'yyyy/MM/dd HH:mm:ss'
+            )
+        ), 
+        'HH'
+    ), 
+    entry_station_id, 
+    exit_station_id
+ORDER BY 
+    hour, 
+    entry_station_id, 
+    exit_station_id;    
+```
+
+查询结果大致如下：
+
+![image-20250418154830433](https://resource-un4.pages.dev/article/image-20250418154830433.png)
+
+
+
+### 将结果东西保存代码
+
+#### **1 筛选记录超过2次的常旅客（保存到`/output/1`）**
+
+```
+-- 执行查询并导出到HDFS目录
+INSERT OVERWRITE DIRECTORY '/output/1'
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+SELECT 
+    passenger_id, 
+    COUNT(*) AS trip_count
+FROM 
+    afc_normal
+GROUP BY 
+    passenger_id
+HAVING 
+    trip_count > 2;
+```
+
+#### **2 分小时进出站量（保存到`/output/2`）**
+
+```
+-- 执行查询并导出到HDFS目录
+INSERT OVERWRITE DIRECTORY '/output/2'
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+SELECT 
+    hour, 
+    SUM(entry_count) AS total_entry, 
+    SUM(exit_count) AS total_exit
+FROM (
+    SELECT 
+        SUBSTR(entry_timestamp, 12, 2) AS hour, 
+        1 AS entry_count, 
+        0 AS exit_count
+    FROM 
+        afc_normal
+    UNION ALL
+    SELECT 
+        SUBSTR(exit_timestamp, 12, 2) AS hour, 
+        0, 
+        1
+    FROM 
+        afc_normal
+) combined
+GROUP BY 
+    hour
+ORDER BY 
+    hour;
+```
+
+#### **3 分小时OD量（按进站时间统计，保存到`/output/3`）**
+
+```
+-- 执行查询并导出到HDFS目录
+INSERT OVERWRITE DIRECTORY '/output/3'
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+SELECT 
+    SUBSTR(entry_timestamp, 12, 2) AS hour,
+    entry_station_id,
+    exit_station_id,
+    COUNT(*) AS od_count
+FROM 
+    afc_normal
+GROUP BY 
+    SUBSTR(entry_timestamp, 12, 2), 
+    entry_station_id, 
+    exit_station_id;
+```
+
+#### **验证HDFS输出**
+
+```
+hdfs dfs -ls /output/1
+hdfs dfs -ls /output/2
+hdfs dfs -ls /output/3
+```
+
+直接在网页端查看更加方便
+
+![image-20250418171742402](https://resource-un4.pages.dev/article/image-20250418171742402.png)
+
+可以看到结果
+
+如此，我们可以直接使用python直接连接hive的sql读取数据并可视化处理，输出图像。
+
+安装相应的包
+
+```BASH
+sudo apt-get install libsasl2-dev python3-dev
+pip install pyhive[hive] pandas matplotlib seaborn
+```
+
+在~/workspace下创建py文件
+
+```python
+# 导入依赖
+from pyhive import hive
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+
+# 配置Hive连接
+HIVE_HOST = "master"    # 你的Hive服务器地址
+HIVE_PORT = 10000       # Hive Thrift端口
+HIVE_USER = "zyjiang"   # 你的用户名
+
+# 创建输出目录
+os.makedirs("output_images", exist_ok=True)
+
+# 连接Hive
+def connect_hive():
+    conn = hive.Connection(
+        host=HIVE_HOST,
+        port=HIVE_PORT,
+        username=HIVE_USER
+    )
+    return conn
+
+# 执行查询并返回DataFrame
+def run_query(query):
+    conn = connect_hive()
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
+
+# ------------------------------
+# 查询1：筛选记录超过2次的常旅客
+# ------------------------------
+query1 = """
+SELECT passenger_id, COUNT(*) AS trip_count
+FROM afc_normal
+GROUP BY passenger_id
+HAVING trip_count > 2
+ORDER BY trip_count DESC
+"""
+df1 = run_query(query1)
+
+# 可视化：Top 10常旅客
+plt.figure(figsize=(10, 6))
+sns.barplot(data=df1.head(10), x="passenger_id", y="trip_count", palette="viridis")
+plt.title("Top 10 Frequent Travelers (Trips > 2)")
+plt.xlabel("Passenger ID")
+plt.ylabel("Trip Count")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig("output_images/frequent_travelers.png")
+plt.close()
+
+# ------------------------------
+# 查询2：分小时进出站量
+# ------------------------------
+query2 = """
+SELECT 
+    hour, 
+    SUM(entry_count) AS total_entry, 
+    SUM(exit_count) AS total_exit
+FROM (
+    SELECT SUBSTR(entry_timestamp, 12, 2) AS hour, 1 AS entry_count, 0 AS exit_count
+    FROM afc_normal
+    UNION ALL
+    SELECT SUBSTR(exit_timestamp, 12, 2) AS hour, 0, 1
+    FROM afc_normal
+) combined
+GROUP BY hour
+ORDER BY hour
+"""
+df2 = run_query(query2)
+
+# 可视化：分小时进出站折线图
+plt.figure(figsize=(12, 6))
+plt.plot(df2["hour"], df2["total_entry"], label="Entry", marker="o", linestyle="-")
+plt.plot(df2["hour"], df2["total_exit"], label="Exit", marker="x", linestyle="--")
+plt.title("Hourly Passenger Flow (Entry vs Exit)")
+plt.xlabel("Hour of Day")
+plt.ylabel("Count")
+plt.legend()
+plt.grid(True)
+plt.savefig("output_images/hourly_flow.png")
+plt.close()
+
+# ------------------------------
+# 查询3：分小时OD量（按进站时间统计）
+# ------------------------------
+query3 = """
+SELECT 
+    SUBSTR(entry_timestamp, 12, 2) AS hour,
+    entry_station_id,
+    exit_station_id,
+    COUNT(*) AS od_count
+FROM afc_normal
+GROUP BY SUBSTR(entry_timestamp, 12, 2), entry_station_id, exit_station_id
+ORDER BY hour, od_count DESC
+"""
+df3 = run_query(query3)
+
+# 可视化：Top 10高频OD对（按小时）
+for hour in df3["hour"].unique():
+    df_hour = df3[df3["hour"] == hour].head(10)
+    if not df_hour.empty:
+        plt.figure(figsize=(12, 6))
+        sns.barplot(data=df_hour, x="od_count", y="entry_station_id", hue="exit_station_id", orient="h")
+        plt.title(f"Top 10 OD Pairs at Hour {hour}")
+        plt.xlabel("OD Count")
+        plt.ylabel("Entry Station ID")
+        plt.tight_layout()
+        plt.savefig(f"output_images/od_hour_{hour}.png")
+        plt.close()
+```
+
+
 
