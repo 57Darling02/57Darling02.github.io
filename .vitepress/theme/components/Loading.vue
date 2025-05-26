@@ -16,13 +16,13 @@ import { } from 'vue'
 .loading-screen {
     position: fixed;
     z-index: 9999;
-    background: rgba(255, 255, 255, 0.38);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
     width: 100vw;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(10px);
 }
 
 $containerSize: 128px;
