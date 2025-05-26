@@ -1,7 +1,9 @@
 <template>
     <div class="firstview">
-        <h1 class="main-title">{{ mainTitle }}</h1>
-        <h2 class="subtitle multipleStrings"></h2>
+    <el-text truncated type="success" size="large" class="main-title">
+      <h2 class="main-title">{{ mainTitle }}</h2>
+    </el-text>
+      <h3 class="subtitle multipleStrings"></h3>
     </div>
 </template>
 
@@ -41,7 +43,7 @@ onUnmounted(() => {
 }
 
 .main-title {
-    font-size: 3rem;
+    font-size: 1.8rem;
     margin-bottom: 1rem;
     color: wheat;
 }
