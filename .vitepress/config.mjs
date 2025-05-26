@@ -110,7 +110,7 @@ export default defineConfig({
   themeConfig: {
     // 首页配置
     mainTitle: "57Darling02's Blog",
-    subTitles: ['如果你抑郁了，说明你活在过去', '如果你焦虑了，说明你活在未来', '如果你平静了，才说明你活在现在。'],
+    subTitles: ['如果你抑郁了，说明你活在过去', '如果你焦虑了，说明你活在未来', '当你平静了，你才活在当下。'],
     defaultauthor: '57Darling02',
     // 网站顶部导航栏配置
     logo: "https://resource-un4.pages.dev/article/yjtp.webp",
@@ -206,12 +206,8 @@ export default defineConfig({
         name: 'GitHub',
         icon: 'fa-brands fa-github',
         url: 'https://github.com/57Darling02/'
-      },
-      {
-        name: '邮箱',
-        icon: 'fa-regular fa-envelope',
-        url: '57Darling02@outlook.com'
-      },
+      }
+      
     ],
     // 站点页脚配置
     footer: {

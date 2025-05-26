@@ -22,6 +22,7 @@ import { } from 'vue'
     display: flex;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(10px);
 }
 
 $containerSize: 128px;
