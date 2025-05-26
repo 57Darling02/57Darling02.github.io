@@ -74,7 +74,7 @@ $time: 2.5s;
         }
 
         &::before {
-            background-color: #000;
+            background-color: red;
             top: -100%;
             animation: rotation-black $time infinite;
 
@@ -101,7 +101,7 @@ $time: 2.5s;
         }
 
         &::after {
-            background-color: rgb(255, 255, 255, 1);
+            background-color: blueviolet;
             top: 100%;
             animation: rotation-white $time infinite;
 
