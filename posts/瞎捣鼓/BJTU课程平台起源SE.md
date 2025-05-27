@@ -76,6 +76,9 @@ tags: 瞎捣鼓
 
 当然，我做到了。
 
+github:
+https://github.com/57Darling02/BjtuCoursePlatform
+
 ![a02fe4ced5a828a429b0c0e118e0122](./BJTU%E8%AF%BE%E7%A8%8B%E5%B9%B3%E5%8F%B0%E8%B5%B7%E6%BA%90SE.assets/a02fe4ced5a828a429b0c0e118e0122.png)
 
 但是不久，课程平台就修复了“能看别人作业”这个接口。
