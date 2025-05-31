@@ -10,10 +10,8 @@
   },
   "scripts": {
     "dev": "vitepress dev",
-    "build": "vitepress build --outDir docs",
     "preview": "vitepress preview",
-    "docs:build": "vitepress build",
-    "safe-build": "npm run docs:build && taskkill /f /im node.exe"
+    "docs:build": "vitepress build"
   },
   "dependencies": {
     "element-plus": "^2.9.5",

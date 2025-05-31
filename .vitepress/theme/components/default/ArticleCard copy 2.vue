@@ -38,7 +38,7 @@ const formattedDate = computed(() => {
 })
 </script>
 <template>
-    <div class="a-card">
+    <div class="a-card" id="ArticleCard">
         <a :href="link" class="article-link">
             <!-- 标题部分 -->
             <el-text tag="h3" class="article-title" size="large" style="text-decoration:none !important;">{{ title }}</el-text>
@@ -65,6 +65,9 @@ const formattedDate = computed(() => {
     </div>
 </template>
 <style scoped>
+#ArticleCard{
+    padding: 10px 20px 10px;
+}
 .article-title {
     margin-bottom: 8px;
     max-width: 100%;
@@ -73,7 +76,6 @@ const formattedDate = computed(() => {
 }
 .article-excerpt {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin: 8px 0;

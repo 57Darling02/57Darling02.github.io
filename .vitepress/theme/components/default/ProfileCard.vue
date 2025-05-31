@@ -1,5 +1,5 @@
 <template>
-  <div class="a-card" :class="{ 'has-border': border }">
+  <div class="a-card profile-card" :class="{ 'has-border': border }" id="profile-card">
     <!-- 头像区域 -->
     <div class="avatar-wrapper">
       <img :src="avatar" :alt="name" class="avatar" @error="handleAvatarError">
@@ -39,10 +39,25 @@ const handleAvatarError = (e) => {
 }
 </script>
 
-<style>
-
-
-
+<style lang="scss">
+#profile-card{
+  padding: 10px 10px 10px;
+}
+/* 头像样式 */
+.avatar-wrapper {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--vp-c-brand);
+  transition: transform 0.3s ease;
+}
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 /* 个人信息 */
 .profile-content {

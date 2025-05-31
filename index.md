@@ -1,7 +1,10 @@
 ---
-title: 57Darling02's Blog
 layout: home
-date: 2023-08-29
 ---
+<HomeView1 />
+<HomeView2 />
 
-##### 57Darling02's Blog
+<script setup>
+import HomeView1 from './.vitepress/theme/components/Views/HomeView1.vue'
+import HomeView2 from './.vitepress/theme/components/Views/HomeView2.vue'
+</script>

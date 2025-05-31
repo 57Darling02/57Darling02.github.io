@@ -1,35 +1,41 @@
 <template>
-  <div class="article-header a-card" style="display: grid; background-color:  rgba(236, 227, 227, 0.333);">
-    <!-- ±ÍÃ‚«¯”Ú -->
+  <div class="a-card" id="article-header">
+    <!-- Ê†áÈ¢òÂå∫Âüü -->
     <div id="header-title">
       <h1>{{ title }}</h1>
     </div>
-    <!-- ‘™–≈œ¢«¯”Ú -->
+    <!-- ÂÖÉ‰ø°ÊÅØÂå∫Âüü -->
     <div class="meta-info">
-      <!-- ◊˜’ﬂ–≈œ¢ -->
+      <!-- ‰ΩúËÄÖ‰ø°ÊÅØ -->
       <div class="author-info">
-        <i class="fa-light fa-user"></i>
+        <el-icon><User /></el-icon>
         <span class="author">{{ author }}</span>
       </div>
-      <!-- ∑÷∏Ùœﬂ -->
+      <!-- ÂàÜÈöîÁ∫ø -->
       <div class="divider"></div>
-      <!-- ∑¢≤º»’∆⁄ -->
+      <!-- ÂèëÂ∏ÉÊó•Êúü -->
       <div class="date-info">
-        <i class="fa-light fa-calendar"></i>
+        <el-icon><Calendar /></el-icon>
         <time :datetime="date">{{ formattedDate }}</time>
       </div>
     </div>
+    <VPDocFooterLastUpdated/>
+    
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useData } from 'vitepress'
-
-const { frontmatter,theme } = useData()
+import { Calendar, User } from '@element-plus/icons-vue'
+import VPDocFooterLastUpdated from './VPDocFooterLastUpdated.vue'
+const { frontmatter,theme,page } = useData()
+// console.log(frontmatter.value)
+// console.log(theme.value)
+// console.log(page.value)
 const {
   title = "Untitled Article",
-  author = theme.value?.defaultauthor || "Unknown Author",
+  author = frontmatter.value?.author ||theme.value?.author || "Unknown Author",
   date = '',
 } = frontmatter.value
 
@@ -48,16 +54,20 @@ const formattedDate = computed(() => {
 </script>
 
 <style>
-.article-header {
+
+#article-header {
   padding: 2rem;
   border-radius: 8px;
   margin-bottom: 2rem;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
   border-color: rgba(228, 195, 195, 0.13);
   background-color: transparent;
   display: flex;
   animation: fadeInUp 1s ease-in-out 0.2s forwards;
   opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #header-title {
@@ -107,7 +117,7 @@ const formattedDate = computed(() => {
   font-size: 1.2em;
 }
 
-/* œÏ”¶ Ω…Ëº∆ */
+/* ÂìçÂ∫îÂºèËÆæËÆ° */
 @media (max-width: 640px) {
   .article-header {
     padding: 1.5rem;
