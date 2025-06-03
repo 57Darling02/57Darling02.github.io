@@ -26,38 +26,22 @@ show_menu() {
 # 发布功能
 deploy() {
   echo "📤 正在发布更新到GitHub..."
-  
-  # 复制必要文件
-  cp posts/主题介绍/README.md README.md
-  
-  
-  # 提交更新
+  git pull origin main --strategy-option ours
   git add .
   git commit -m "update"
   git pull
   git push origin main
-  
   echo "✅ 已成功发布更新！"
 }
-
-deploy_dev() {
-  echo "📤 正在发布更新到GitHub..."
-  
-  # 复制必要文件
+copy_file() {
+  # 开发使用
   cp posts/主题介绍/README.md README.md
   cp site_config.ts .vitepress/site_config_template.ts
-  # 提交更新
-  git add .
-  git commit -m "update"
-  git push origin main
-  
-  echo "✅ 已成功发布dev更新！"
 }
 
 # 更新主题功能
 update_theme() {
   echo "🔄 开始更新主题..."
-  
   # 检查工作区是否干净
   if ! git diff --quiet || ! git diff --cached --quiet; then
     echo "错误：工作区或暂存区存在未提交的更改。请先提交或保存更改后再更新主题。"
@@ -77,10 +61,6 @@ update_theme() {
     git remote add upstream $UPSTREAM_URL
   fi
 
-  # 获取最新主题
-  echo "获取最新主题..."
-  git fetch upstream main
-
   # 显示警告
   echo ""
   echo "⚠️ 警告：即将强制更新所有主题文件（保护内容除外）"
@@ -97,48 +77,30 @@ update_theme() {
     return 0
   fi
 
-  # 备份保护内容
-  echo "备份保护内容..."
-  local BACKUP_DIR=".theme-backup-$(date +%s)"
-  mkdir -p "$BACKUP_DIR"
-
-  for path in "${PROTECTED_PATHS[@]}"; do
-    if [ -e "$path" ]; then
-      mkdir -p "$(dirname "$BACKUP_DIR/$path")"
-      cp -rp "$path" "$BACKUP_DIR/$path"
-      echo "备份: $path"
-    else
-      echo "注意: 保护路径 $path 不存在"
-    fi
-  done
-
-  # 强制更新
-  echo "强制更新主题..."
-  git reset --hard upstream/main
-
-  # 恢复保护内容
-  echo "恢复保护内容..."
-  for path in "${PROTECTED_PATHS[@]}"; do
-    if [ -e "$BACKUP_DIR/$path" ]; then
-      # 确保目标目录存在
-      mkdir -p "$(dirname "$path")"
-      # 使用rsync进行更安全的同步
-      rsync -a --delete "$BACKUP_DIR/$path/" "$path/" 2>/dev/null || \
-        cp -rp "$BACKUP_DIR/$path" "$(dirname "$path")"
-      echo "恢复: $path"
-    fi
-  done
-
-  # 创建恢复提交
-  echo "创建恢复提交..."
+  echo "确保本地文件和仓库文件同步且使用以本地为主"
+  git pull origin main --strategy-option ours
+  echo "保存当前配置"
   git add .
-  git commit -m "更新主题并恢复自定义内容"
-  
-  # 清理备份
-  echo "清理临时文件..."
-  rm -rf "$BACKUP_DIR"
+  git commit -m "Save local changes before update"
+  echo "拉取上游更新（自动合并，冲突时使用上游版本）"
+  git fetch upstream main
+  git pull upstream/main --strategy-option theirs 
+  echo "正在恢复保护的文件和目录..."
+  for path in "${PROTECTED_PATHS[@]}"; do
+    if [ -e "$path" ] || git ls-tree --error-unmatch HEAD "$path" >/dev/null 2>&1; then
+      git checkout HEAD -- "$path"
+      echo "  ✓ $path"
+    else
+      echo "  - $path (不存在，跳过)"
+    fi
+  done
+  echo "提交合并结果"
+  if ! git diff --quiet; then
+    git commit -m "Merge upstream, keep protected files"
+  else
+    echo "没有更改需要提交"
+  fi
 
-  # 完成提示
   echo ""
   echo "🎉 主题更新完成！"
   echo "---------------------------------"
@@ -146,12 +108,11 @@ update_theme() {
   for path in "${PROTECTED_PATHS[@]}"; do
     echo "  - $path"
   done
+
+  
   echo ""
-  echo "下一步建议:"
-  echo "1. 运行本地预览: npm run dev"
-  echo "2. 检查站点功能"
-  echo "3. 如有问题可回退: git reset --hard HEAD^"
-  echo "4. 测试无误后推送: git push origin main"
+  echo "如有问题可回退: git reset --hard HEAD@{1}"
+  echo "测试无误后推送"
 }
 
 # 主程序
@@ -168,7 +129,8 @@ main() {
         update_theme
         ;;
       3)
-        deploy_dev
+        copy_file
+        deploy
         ;;
       *) 
         echo "操作已取消"
