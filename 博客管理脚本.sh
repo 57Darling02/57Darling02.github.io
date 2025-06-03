@@ -56,11 +56,8 @@ update_theme() {
   fi
 
   # 添加上游仓库
-  if ! git remote | grep -q upstream; then
-    echo "添加上游主题仓库..."
-    git remote add upstream $UPSTREAM_URL
-  fi
-
+  
+  git remote add upstream $UPSTREAM_URL
   # 显示警告
   echo ""
   echo "⚠️ 警告：即将强制更新所有主题文件（保护内容除外）"
