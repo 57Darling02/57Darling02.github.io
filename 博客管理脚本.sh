@@ -25,11 +25,11 @@ show_menu() {
 
 # 发布功能
 deploy() {
-  echo "📤 正在发布更新到GitHub..."
+  echo "📤 合并git提交线，以本地文件为核心"
   git pull origin main --strategy-option ours
   git add .
   git commit -m "update"
-  git pull
+  echo "📤 正在发布更新到GitHub..."
   git push origin main
   echo "✅ 已成功发布更新！"
 }
