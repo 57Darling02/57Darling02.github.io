@@ -10,74 +10,60 @@ PROTECTED_PATHS=(
   "site_config.ts"
   "public/"
   ".github/"
+  "docs/.vitepress/config.ts"
+  "docs/.vitepress/theme/"
+  "package.json"
+  "package-lock.json"
+  "pnpm-lock.yaml"
+  "yarn.lock"
 )
 
 echo "🚀 VitePress_butterfly 主题极简更新工具"
 echo "------------------------------------"
 
-# 第一步：检查是否在Git仓库中
+# 检查是否在Git仓库中
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "错误：当前目录不是Git仓库！"
   echo "请确保在项目根目录运行此脚本"
   exit 1
 fi
 
-# 第二步：添加上游仓库
+# 添加上游仓库
 if ! git remote | grep -q upstream; then
   echo "添加上游主题仓库..."
   git remote add upstream $UPSTREAM_URL
 fi
 
-# 第三步：获取最新主题
-echo "获取最新主题..."
-git fetch upstream main
+# 确保本地文件和仓库文件同步且使用以本地为主
+git pull origin main --strategy-option ours
+# 更新主题前保存状态
+git add .
+git commit -m "Save local changes before update"
 
-# 第四步：显示警告信息
-echo ""
-echo "⚠️ 警告：即将强制更新所有主题文件（保护内容除外）"
-echo "----------------------------------------------"
-echo "以下内容将被保护:"
+# 拉取上游更新（自动合并，冲突时使用上游版本）
+git fetch upstream
+git pull upstream/main --strategy-option theirs  
+
+# 将所有保护的文件/目录恢复到更新主题前的状态
+echo "正在恢复保护的文件和目录..."
 for path in "${PROTECTED_PATHS[@]}"; do
-  echo "  - $path"
+  if [ -e "$path" ] || git ls-tree --error-unmatch HEAD "$path" >/dev/null 2>&1; then
+    git checkout HEAD -- "$path"
+    echo "  ✓ $path"
+  else
+    echo "  - $path (不存在，跳过)"
+  fi
 done
 
-# 第五步：确认操作
-read -p "是否继续更新？(y/n): " confirm </dev/tty
-if [[ ! $confirm =~ ^[Yy]$ ]]; then
-  echo "操作已取消"
-  exit 0
+# 提交合并结果
+if ! git diff --quiet; then
+  git commit -m "Merge upstream, keep protected files"
+else
+  echo "没有更改需要提交"
 fi
 
-# 第六步：备份保护内容
-echo "备份保护内容..."
-BACKUP_DIR=".theme-backup-$(date +%s)"
-mkdir "$BACKUP_DIR"
-
-for path in "${PROTECTED_PATHS[@]}"; do
-  if [ -e "$path" ]; then
-    cp -r "$path" "$BACKUP_DIR/$path"
-    echo "备份: $path"
-  fi
-done
-
-# 第七步：强制更新所有文件
-echo "强制更新主题..."
-git reset --hard upstream/main
-
-# 第八步：恢复保护内容
-echo "恢复保护内容..."
-for path in "${PROTECTED_PATHS[@]}"; do
-  if [ -e "$BACKUP_DIR/$path" ]; then
-    rm -rf "$path"
-    cp -rp "$BACKUP_DIR/$path" "./"
-    echo "恢复: $path"
-  fi
-done
-
-# 第九步：清理备份
-echo "清理临时文件..."
-rm -rf "$BACKUP_DIR"
-
+# 推送到云端仓库
+git push origin main
 
 # 完成提示
 echo ""
