@@ -56,8 +56,11 @@ update_theme() {
   fi
 
   # 添加上游仓库
-  
-  git remote add upstream $UPSTREAM_URL
+  if ! git remote | grep -q upstream; then
+    echo "添加上游主题仓库..."
+    git remote add upstream $UPSTREAM_URL
+  fi
+
   # 显示警告
   echo ""
   echo "⚠️ 警告：即将强制更新所有主题文件（保护内容除外）"
@@ -79,24 +82,29 @@ update_theme() {
   echo "保存当前配置"
   git add .
   git commit -m "Save local changes before update"
+  PRE_MERGE_COMMIT=$(git rev-parse HEAD)
+  echo "合并前的提交ID: $PRE_MERGE_COMMIT"  # 调试用
   echo "拉取上游更新（自动合并，冲突时使用上游版本）"
   git fetch upstream main
-  git pull upstream/main --strategy-option theirs 
+  git merge -s recursive -X theirs upstream/main || true
   echo "正在恢复保护的文件和目录..."
   for path in "${PROTECTED_PATHS[@]}"; do
-    if [ -e "$path" ] || git ls-tree --error-unmatch HEAD "$path" >/dev/null 2>&1; then
-      git checkout HEAD -- "$path"
-      echo "  ✓ $path"
-    else
-      echo "  - $path (不存在，跳过)"
+    # 彻底删除本地目录
+    if [ -e "$path" ]; then
+      echo "  - 清空保护目录: $path"
+      rm -rf "$path"
+      git rm -rf "$path" 
     fi
+    # 尝试从合并前的提交恢复（即使目录之前不存在也继续）
+    git checkout $PRE_MERGE_COMMIT -- "$path" 2>/dev/null
+    # 检查恢复是否成功
+    if [ -e "$path" ]; then
+      echo "  ✓ 恢复保护目录: $path"
+    else
+      echo "  - $path (恢复失败，可能在合并前不存在)"
+    fi
+    
   done
-  echo "提交合并结果"
-  if ! git diff --quiet; then
-    git commit -m "Merge upstream, keep protected files"
-  else
-    echo "没有更改需要提交"
-  fi
 
   echo ""
   echo "🎉 主题更新完成！"
