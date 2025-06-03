@@ -13,7 +13,7 @@ export default {
     },
     background: '/wallpaper/1.webp',
     pageSize: 8, //首页文章列表分页大小，默认为8
-    sortedMethor : 'lastUpdated' as "title"|"date"|"lastUpdated", //排序方式，默认为lastUpdated，可选值为lastUpdated、date、title
+    sortedMethor : 'title' as "title"|"date"|"lastUpdated", //排序方式，默认为lastUpdated，可选值为lastUpdated、date、title
     
     // 最后更新时间相关选项
   lastUpdated: {
