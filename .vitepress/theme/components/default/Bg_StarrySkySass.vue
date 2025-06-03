@@ -8,13 +8,14 @@
             backgroundRepeat: 'no-repeat'  /* 禁止重复 */
         } : {}"
     >
-        <div  v-for="layer in 5" :class="`layer${layer}`" />
+        <div v-if="bg_rainfall" v-for="layer in 5" :class="`layer${layer}`" />
     </div>
 </template>
 <script lang='ts' setup>
 import { useData } from 'vitepress'
-const { theme} = useData()
+const { theme } = useData()
 const BGIMG_url = theme.value.background || ''
+const bg_rainfall = theme.value.bg_rainfall || false
 
 </script>
 <style lang="scss" scoped>
@@ -46,11 +47,11 @@ const BGIMG_url = theme.value.background || ''
 
 $duration: 400s;
 $count: 250;
-@for $i from 1 through 4 {
+@for $i from 2 through 5 {
     $duration: calc($duration / 2);
     $count: math.floor(calc($count / 2));
     .layer#{$i} {
-        $size: #{$i*2}px;
+        $size: #{$i*1.2}px;
         position: fixed;
         width: $size;
         height: $size;

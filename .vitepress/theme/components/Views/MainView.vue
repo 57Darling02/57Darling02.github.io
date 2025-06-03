@@ -12,14 +12,17 @@
                     <PostInfo />
                 </template>
                 <template #main-content>
-                    <content class="vp-doc fade-item" style="overflow-x: hidden;padding: 38px 30px 20px;" :class="{ 'a-card': !isFocusMode }" />
+                    <content class="vp-doc fade-item" :class="{ 'a-card': !isFocusMode }"
+                        style="overflow-x: hidden;padding: 38px 30px 20px; --delay:0s" />
                 </template>
                 <template #sidebar-non-stay>
-                    <ProfileCard />
+                    <div class="fade-item" style="--delay:0.2s"><ProfileCard /></div>
                 </template>
                 <template #sidebar-stay>
-                    <Toc class="a-card" style="height: 300px;display: flex;flex-direction: column;padding: 18px;" v-if="!isFocusMode"/>
-                    <Toc style="background-color: var(--vp-sidebar-bg-color);" v-else/>
+                    <div class="fade-item" style="--delay:0.5s" v-if="!isFocusMode">
+                        <Toc class="a-card" style="height: 300px;display: flex;flex-direction: column;padding: 18px;"/>
+                    </div>
+                    <Toc style="background-color: var(--vp-sidebar-bg-color);" v-else />
                 </template>
             </DocView>
         </div>
@@ -37,6 +40,4 @@ const data = useData()
 const frontmatter = computed(() => data.frontmatter.value)
 const isFocusMode = inject('isFocusMode')
 </script>
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

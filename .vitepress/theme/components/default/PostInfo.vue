@@ -21,7 +21,7 @@
       <div class="date-info">
         <time :datetime="date">📅{{ formattedDate }}</time>
         <div class="divider"></div>
-        <VPDocFooterLastUpdated :lastUpdated="page.lastUpdated" />
+        <VPDocFooterLastUpdated v-if="lastUpdated" :lastUpdated="lastUpdated" />
       </div>
     </div>
   </div>
@@ -31,8 +31,14 @@
 import { computed } from 'vue'
 import { useData } from 'vitepress'
 import { Calendar, User } from '@element-plus/icons-vue'
+import { data as posts } from '../utils/posts.data.ts'
 import VPDocFooterLastUpdated from './VPDocFooterLastUpdated.vue'
+
 const { frontmatter, theme, page } = useData()
+const lastUpdated = posts.find(post =>
+  post.link.replace(/\.html$/, '.md') === '/' + page.value.filePath
+)?.lastUpdated
+
 const {
   title = "Untitled Article",
   author = frontmatter.value?.author || theme.value?.author || "Unknown Author",

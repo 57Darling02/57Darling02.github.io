@@ -11,11 +11,12 @@
       </template>
       <template #main-content>
         <ClientOnly>
-          <div class="fade-item" v-for="post in currentPosts" :key="post.link" style="padding: 0px 5px 12px;">
+          <!-- <ArticleCard class="a-card" v-for="(post, index) in currentPosts" :post="post" style="margin: 0px 5px 10px;"  /> -->
+          <div class="fade-item" v-for="(post, index) in currentPosts" :key="post.link" style="padding: 0px 5px 12px;" :style="{ '--delay': (0.2 + index * 0.05) + 's' }">
             <ArticleCard :post="post" />
           </div>
           <div style="display: flex;justify-content: center;">
-            <el-pagination hide-on-single-page :total="posts.length" :current-page="currentPage" :page-size="pageSize"
+            <el-pagination hide-on-single-page :total="posts.length" :current-page="currentPage" :page-size="pageSize" :pagercount="3"
               layout="prev, pager, next, jumper" @current-change="handleCurrentChange" style="" />
           </div>
         </ClientOnly>
@@ -35,12 +36,12 @@ import TypeIt from 'typeit'
 import DocView from './DocView.vue'
 import ProfileCard from '../default/ProfileCard.vue'
 import ArticleCard from '../default/ArticleCard.vue'
-
 import { data as posts } from '../utils/posts.data.ts'
 
 // 分页状态
 const currentPage = ref(1)
 const pageSize = ref(theme.value.pageSize || 8)  // 每页最多8条
+
 // 计算当前页显示的帖子
 const currentPosts = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
@@ -68,6 +69,8 @@ onMounted(() => {
       animation: { opacity: 0 }
     }
   }).go()
+  const firstViewHeight = theme.value?.home?.firstViewHeight || '100'
+  document.querySelector('.firstview').style.height = firstViewHeight + 'vh'
 })
 
 onUnmounted(() => {
@@ -76,7 +79,7 @@ onUnmounted(() => {
 </script>
 <style>
 .firstview {
-  height: 100vh;
+  height: 50vh;
   display: flex;
   flex-direction: column;
   justify-content: center;

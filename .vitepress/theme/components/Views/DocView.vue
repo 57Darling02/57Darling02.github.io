@@ -7,7 +7,7 @@
     <div id="content-container" :style="{ maxWidth: isFocusMode&& (!frontmatter.layout || frontmatter.layout == 'doc') ? 'none' : '1200px' }">
 
         <!-- 主内容 -->
-        <div id="page-wrapper">
+        <div id="page-wrapper" style="overflow: hidden;padding-top: 20px;">
             <slot name="main-content" />
         </div>
 
@@ -59,12 +59,13 @@ $hide-offset: var(--nav-height);
 #page-wrapper {
     padding: 0px 5px 0px;
     width: 100%;
-    overflow: auto;
+    overflow:auto;
 
 }
 
 .sidebar {
     padding: 0px 10px;
+    padding-top: 20px;
     // position: static;
     min-width: var(--sidebar-width);
     max-width: var(--sidebar-width);

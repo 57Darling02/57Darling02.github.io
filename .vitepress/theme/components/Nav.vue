@@ -8,9 +8,8 @@
                 </a>
             </el-col>
             <el-col :span="12" justify="end" style="flex-direction: column;">
-
                 <div style="display: flex;height: 100%;justify-content: end;" id="menu">
-                    <div class="dropitem">
+                    <div class="dropitem" v-if="showSidebar" style="padding-right: 10px;">
                         <el-dropdown v-for="item in menuItems" :key="item.label" popper-class="custom-dropdown">
                             <h3 class="menu-fitem">
                                 <span>
@@ -30,12 +29,12 @@
                             </template>
                         </el-dropdown>
                     </div>
-                    <VPNavBarHamburger :active="visible" @click="visible = !visible" />
+                    <VPNavBarHamburger :active="visible" @click="visible = !visible"/>
                 </div>
             </el-col>
         </el-row>
     </div>
-    <el-drawer v-model="visible" :size="300" :destroy-on-close="true" :show-close="false"
+    <el-drawer v-model="visible" :size="300" :destroy-on-close="true" :show-close="false" append-to-body
         style="border-top-left-radius: 12px;border-bottom-left-radius: 12px;" :before-close="handleBeforeClose">
         <template v-if="drawerContentVisible">
             <el-row>
@@ -48,7 +47,7 @@
                     <ToggleFocusModeBTN />
                 </el-col>
             </el-row>
-            <Drawer />
+            <Drawer v-if="!showSidebar"/>
             <!-- theme: {{ theme }}
         page: {{ page }} -->
             <!-- frontmatter: {{ frontmatter }} -->
@@ -199,20 +198,7 @@ $hide-offset: 100%;
         transform: rotate(180deg);
     }
 
-    @media (max-width: 748px) {
-        .menu-fitem i {
-            margin: 0;
-        }
-
-        .dropitem {
-            display: none;
-        }
-
-        .sbbtn {
-            display: flex;
-        }
-
-    }
+    
 }
 
 #title {

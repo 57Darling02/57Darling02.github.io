@@ -12,7 +12,7 @@
     </transition>
 
 
-    <el-scrollbar height="100vh" ref="scrollbarRef" @scroll="handleScroll" wrap-style="max-width:100vw;">
+    <el-scrollbar height="100vh" ref="scrollbarRef" @scroll="handleScroll" wrap-style="max-width:100vw;" noresize>
         <el-header height="var(--nav-height)">
             <ClientOnly><Nav /></ClientOnly>
         </el-header>
@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { inject, onMounted, onUnmounted, ref } from 'vue'
 import { throttle } from 'lodash-es'
-import { useData } from 'vitepress'
+import { useData, onContentUpdated } from 'vitepress'
 const { theme, page, frontmatter, isDark } = useData()
 import { ArrowUpBold } from '@element-plus/icons-vue'
 import Nav from './components/Nav.vue'
@@ -87,7 +87,9 @@ const handleScroll = throttle(({ scrollTop }) => {
 const backToTop = () => {
     scrollbarRef.value?.wrapRef?.scrollTo({ top: 0, behavior: 'smooth' })
 }
-
+onContentUpdated(() => {
+    backToTop()
+})
 
 // 挂载处理
 onMounted(() => {
@@ -116,41 +118,7 @@ onUnmounted(() => {
     z-index: 9999;
 }
 
-@keyframes fadeInUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-$base-delay: 0.2s;
-$delay-step: 0.05s;
 
-/* 公共动画类 */
-.fade-item {
-    opacity: 0;
-    animation: fadeInUp 0.2s ease-in-out forwards;
-    animation-delay: $base-delay;
-    /* 使用初始延迟 */
-    /* 每次应用后自动累加步长 */
-    $base-delay: $base-delay + $delay-step;
-}
-
-.fade-group {
-
-    /* 为每个循环项设置递增延迟 */
-    @for $i from 1 through 30 {
-        .fade-item:nth-child(#{$i}) {
-            animation-delay: ($i - 1) * $delay-step;
-            /* 第一个元素0s，第二个0.05s...第30个1.45s */
-        }
-    }
-
-    $base-delay: 0.2s;
-}
 </style>
