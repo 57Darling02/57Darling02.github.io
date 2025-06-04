@@ -99,7 +99,7 @@ export default defineConfigWithTheme<ThemeConfig>({
   title: myconfig.site_name || "VitePress-Butterfly",
   description: myconfig.site_description || "VitePress-Butterfly is a VitePress theme inspired by the Butterfly theme.",
   themeConfig: myconfig,
-  lastUpdated: false,
+  lastUpdated: true,
   vite: {
     ssr: {
       noExternal: ['element-plus']

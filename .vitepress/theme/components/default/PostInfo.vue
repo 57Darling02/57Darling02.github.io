@@ -32,9 +32,7 @@ import { data as posts } from '../utils/posts.data.ts'
 import VPDocFooterLastUpdated from './VPDocFooterLastUpdated.vue'
 
 const { frontmatter, theme, page } = useData()
-const lastUpdated = posts.find(post =>
-  post.link.replace(/\.html$/, '.md') === '/' + page.value.relativePath
-)?.lastUpdated
+const lastUpdated = page.value?.lastUpdated
 const {
   title = "Untitled Article",
   author = frontmatter.value?.author || theme.value?.author || "Unknown Author",
