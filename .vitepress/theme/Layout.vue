@@ -4,9 +4,7 @@
     <transition name="el-fade-in">
         <div id="control" v-if="showNavbar && lastScrollY > 100">
             <div class="social-item" @click="backToTop">
-                <el-icon>
-                    <ArrowUpBold />
-                </el-icon>
+                <i class="fa-solid fa-chevron-up"></i>
             </div>
         </div>
     </transition>
@@ -31,7 +29,6 @@ import { inject, onMounted, onUnmounted, ref } from 'vue'
 import { throttle } from 'lodash-es'
 import { useData, onContentUpdated } from 'vitepress'
 const { theme, page, frontmatter, isDark } = useData()
-import { ArrowUpBold } from '@element-plus/icons-vue'
 import Nav from './components/Nav.vue'
 import Footer from './components/Footer.vue'
 import MainView from './components/Views/MainView.vue'

@@ -1,4 +1,6 @@
-const config: SiteConfig = {
+import ThemeConfig  from "./.vitepress/theme/ts/ThemeConfig";
+// 使用typescript类型检查
+const config: ThemeConfig = {
   // VitePress 站点基本配置
   site_name: "My Awesome Site",
   site_description: "这是一个使用 VitePress 构建的文档站点。",
@@ -14,18 +16,16 @@ const config: SiteConfig = {
     firstViewHeight: 60, //首页第一屏的高度，默认为100vh
   },
   pageSize: 8, //首页文章列表分页大小，默认为8
-  sortedMethor : 'lastUpdated', //排序方式，默认为lastUpdated，可选值为lastUpdated、date、title
+  sortedMethor : 'date', //排序方式，默认为lastUpdated，可选值为lastUpdated、date
   
   // 背景
   background: '/wallpaper/1.webp',
   bg_rainfall: true, //是否开启背景雨
 
-  
-  
   // 最后更新时间相关选项
   lastUpdated: {
     use: true, // 是否开启最后更新时间
-    text: '📆最后更新于', // 最后更新时间的文本
+    text: '', // 最后更新时间的文本
   },
 
   // 侧边简介卡
@@ -74,73 +74,6 @@ const config: SiteConfig = {
     },
   ],
 };
-
-interface SiteConfig {
-  // 站点基本配置
-  site_name: string;
-  site_description: string;
-  site_url: string;
-  author: string;
-  defaultFocusMode: boolean;
-  isDark: boolean | null;
-  // 首页配置
-  home: HomeConfig;
-  background: string;
-  bg_rainfall: boolean;
-  pageSize: number;
-  sortedMethor: "date" | "lastUpdated";
-  // 最后更新时间
-  lastUpdated: LastUpdatedConfig;
-  // 侧边简介卡
-  avatar: string;
-  name: string;
-  position: string;
-  bio: string;
-  socialLinks: SocialLink[];
-  // 页脚
-  footer: FooterConfig;
-  // 菜单栏
-  menuToc: boolean;
-  menuItems: MenuItem[];
-}
-
-
-// 定义子类型
-interface HomeConfig {
-  mainTitle: string;
-  subTitles: string[];
-  firstViewHeight: number,
-}
-
-interface LastUpdatedConfig {
-  use: boolean;
-  text: string;
-}
-
-interface SocialLink {
-  name: string;
-  icon: string;
-  url: string;
-}
-
-interface FooterConfig {
-  message: string;
-  copyright: string;
-}
-
-interface MenuChildItem {
-  key: string;
-  label: string;
-  icon: string;
-  link: string;
-}
-
-interface MenuItem {
-  label: string;
-  icon: string;
-  children: MenuChildItem[];
-}
-
 
 
 

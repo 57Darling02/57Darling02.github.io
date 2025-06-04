@@ -8,18 +8,16 @@
     <div class="meta-info">
       <!-- 作者信息 -->
       <div class="author-info">
-        <el-icon>
-          <User />
-        </el-icon>
+        <i class="fa-solid fa-user"></i>
         <span class="author">{{ author }}</span>
       </div>
       <div class="divider"></div>
-      <a>👁️<span id="busuanzi_value_page_pv">--</span>次</a>
+      <a><i class="fa-solid fa-eye"></i><span id="busuanzi_value_page_pv">--</span>次</a>
       <!-- 分隔线 -->
       <div class="divider"></div>
       <!-- 发布日期 -->
       <div class="date-info">
-        <time :datetime="date">📅{{ formattedDate }}</time>
+        <time :datetime="date"><i class="fa-solid fa-calendar"></i>{{ formattedDate }}</time>
         <div class="divider"></div>
         <VPDocFooterLastUpdated v-if="lastUpdated" :lastUpdated="lastUpdated" />
       </div>
@@ -30,15 +28,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useData } from 'vitepress'
-import { Calendar, User } from '@element-plus/icons-vue'
 import { data as posts } from '../utils/posts.data.ts'
 import VPDocFooterLastUpdated from './VPDocFooterLastUpdated.vue'
 
 const { frontmatter, theme, page } = useData()
 const lastUpdated = posts.find(post =>
-  post.link.replace(/\.html$/, '.md') === '/' + page.value.filePath
+  post.link.replace(/\.html$/, '.md') === '/' + page.value.relativePath
 )?.lastUpdated
-
 const {
   title = "Untitled Article",
   author = frontmatter.value?.author || theme.value?.author || "Unknown Author",

@@ -40,10 +40,8 @@ const contentLoaderConfig = {
             { concurrency: 64 }
         );
         // Sort the data based on the themeConfig.sortedMethor options
-        const sortedMethor: "title" | "date" | "lastUpdated" = theme.sortedMethor || 'lastUpdated';
-        if (sortedMethor === 'title') {
-            data.sort((a, b) => a.title.localeCompare(b.title));
-        } else if (sortedMethor === 'date') {
+        const sortedMethor:  "date" | "lastUpdated" = theme.sortedMethor || 'lastUpdated';
+        if (sortedMethor === 'date') {
             data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         } else {
             data.sort((a, b) => b.lastUpdated - a.lastUpdated);

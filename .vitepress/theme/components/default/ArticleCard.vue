@@ -56,13 +56,12 @@ const formattedDate = computed(() => {
                         <el-tag v-for="(tag, index) in props.post.tags" :key="index" size="default" type="info"
                             effect="plain"
                             style="display: flex;justify-content: center;background-color: var(--vp-c-bg-soft);" round>
-                            🏷️{{ tag }}
+                            <i class="fa-solid fa-tag"></i>{{ tag }}
                         </el-tag>
-                        <p v-if="formattedDate" class="article-words">📅{{ formattedDate }}</p>
-                        ✍️{{ props.post.textNum }}字
+                        <p v-if="formattedDate" class="article-words"><i class="fa-solid fa-calendar"></i>{{ formattedDate }}</p>
+                        <i class="fa-solid fa-pen"></i>{{ props.post.textNum }}字
                         <VPDocFooterLastUpdated :lastUpdated="props.post.lastUpdated" />
                     </el-space>
-
                 </div>
             </article>
         </a>

@@ -1,4 +1,6 @@
-import { defineConfig } from 'vitepress'
+// import { defineConfig } from 'vitepress'
+import ThemeConfig from './theme/ts/ThemeConfig'
+import { defineConfigWithTheme } from 'vitepress'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
@@ -93,7 +95,7 @@ const customElements = [
   'annotation',
   'annotation-xml',
 ];
-export default defineConfig({
+export default defineConfigWithTheme<ThemeConfig>({
   title: myconfig.site_name || "VitePress-Butterfly",
   description: myconfig.site_description || "VitePress-Butterfly is a VitePress theme inspired by the Butterfly theme.",
   themeConfig: myconfig,

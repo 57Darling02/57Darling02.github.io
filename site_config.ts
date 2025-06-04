@@ -1,23 +1,32 @@
-const config: SiteConfig = {
-    // VitePress 站点基本配置,必填，允许留空
-    site_name: "57Darling02's Blog",
-    site_description: "哈哈哈哈呵呵呵呵",
-    site_url: "/",
-    author: '57Darling02',
-    defaultFocusMode: false, // 是否默认开启焦点模式
-    isDark: null, // 是否默认开启深色模式, null 则会跟随系统
-    // 首页配置
-    home: {
-        mainTitle: "57Darling02's Blog",
-        subTitles: ['世界上只有一种英雄主义', '那就是在认清生活的真相后', '依然热爱生活', '如果你抑郁了，说明你活在过去', '如果你焦虑了，说明你活在未来', '当你平静了，你才活在当下。'],//打字机效果的副标题，使用字符串列表
-        firstViewHeight: 60, //首页第一屏的高度，默认为100vh
-    },
-    pageSize: 8, //首页文章列表分页大小，默认为8
-    sortedMethor: 'lastUpdated', //排序方式，默认为lastUpdated，可选值为lastUpdated、date、title
+import ThemeConfig  from "./.vitepress/theme/ts/ThemeConfig";
+// 使用typescript类型检查
+const config: ThemeConfig = {
+  // VitePress 站点基本配置
+  site_name: "My Awesome Site",
+  site_description: "这是一个使用 VitePress 构建的文档站点。",
+  site_url: "/",
+  author: '57Darling02',
+  defaultFocusMode: false, // 是否默认开启焦点模式
+  isDark: null, // 是否默认开启深色模式, null 则会跟随系统
 
-    // 背景
-    background: '/wallpaper/1.webp',
-    bg_rainfall: true, //是否开启背景雨
+  // 首页配置
+  home: {
+    mainTitle: "My Awesome Site",
+    subTitles: ['世界上只有一种英雄主义', '那就是在认清生活的真相后', '依然热爱生活'],//打字机效果的副标题，使用字符串列表
+    firstViewHeight: 60, //首页第一屏的高度，默认为100vh
+  },
+  pageSize: 8, //首页文章列表分页大小，默认为8
+  sortedMethor : 'date', //排序方式，默认为lastUpdated，可选值为lastUpdated、date
+  
+  // 背景
+  background: '/wallpaper/1.webp',
+  bg_rainfall: true, //是否开启背景雨
+
+  // 最后更新时间相关选项
+  lastUpdated: {
+    use: true, // 是否开启最后更新时间
+    text: '', // 最后更新时间的文本
+  },
 
 
 
@@ -102,73 +111,6 @@ const config: SiteConfig = {
         },
     ],
 }
-
-interface SiteConfig {
-  // 站点基本配置
-  site_name: string;
-  site_description: string;
-  site_url: string;
-  author: string;
-  defaultFocusMode: boolean;
-  isDark: boolean | null;
-  // 首页配置
-  home: HomeConfig;
-  background: string;
-  bg_rainfall: boolean;
-  pageSize: number;
-  sortedMethor: "date" | "lastUpdated";
-  // 最后更新时间
-  lastUpdated: LastUpdatedConfig;
-  // 侧边简介卡
-  avatar: string;
-  name: string;
-  position: string;
-  bio: string;
-  socialLinks: SocialLink[];
-  // 页脚
-  footer: FooterConfig;
-  // 菜单栏
-  menuToc: boolean;
-  menuItems: MenuItem[];
-}
-
-
-// 定义子类型
-interface HomeConfig {
-  mainTitle: string;
-  subTitles: string[];
-  firstViewHeight: number,
-}
-
-interface LastUpdatedConfig {
-  use: boolean;
-  text: string;
-}
-
-interface SocialLink {
-  name: string;
-  icon: string;
-  url: string;
-}
-
-interface FooterConfig {
-  message: string;
-  copyright: string;
-}
-
-interface MenuChildItem {
-  key: string;
-  label: string;
-  icon: string;
-  link: string;
-}
-
-interface MenuItem {
-  label: string;
-  icon: string;
-  children: MenuChildItem[];
-}
-
 
 
 
