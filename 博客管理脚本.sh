@@ -124,11 +124,9 @@ update_theme() {
     
   done
   git checkout -b temp-branch
-
   git checkout main
-
-  git merge --no-ff temp-branch
-
+  git merge --no-ff temp-branch -m "合并git提交线，以本地文件为核心"
+  git branch -d temp-branch
   echo ""
   echo "🎉 主题更新完成！"
   echo "---------------------------------"
