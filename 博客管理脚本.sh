@@ -123,6 +123,11 @@ update_theme() {
     fi
     
   done
+  git checkout -b temp-branch
+
+  git checkout main
+
+  git merge --no-ff temp-branch
 
   echo ""
   echo "🎉 主题更新完成！"
