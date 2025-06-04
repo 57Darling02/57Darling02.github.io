@@ -60,9 +60,8 @@ layout: doc # 这行不写也行，涉及到自定义页面才会涉及
 git add . && git commit -m "update" && git push origin main
 ```
 
-
-
-
+> [!WARNING]
+> 使用 -f 强制上传会导致最后更新时间失效。
 
 ### （可选，如果你仅仅使用默认样式，请跳过）预览文章
 
@@ -91,22 +90,11 @@ npm run preview
 
 ##### 工作流（推荐）
 
-1. 打开.github workflow **复制deploy.yml内容**
-    ![image-20250310101611742](https://resource-un4.pages.dev/article/image-20250310101611742.png)
+如果你是直接复刻仓库，那么完全不需要，我已经帮给你写好了。如果你非要自己搞，请参考vitepress官方文档。工作流将会在你push文件时触发，仓库上方点击actions查看部署进度。
 
-2. 在github page 创建工作流自己的工作流：
+这种方式能够：
 
-![image-20250602230707190](https://resource-un4.pages.dev/article/image-20250602230707190.png)
-
-![image-20250602230811624](https://resource-un4.pages.dev/article/image-20250602230811624.png)
-
-  会让创建一个文件，在上方命名为mydeploy.yml，**粘贴上**从deploy.yml复制的内容，提交。
-
-3. 在本地的仓库中git pull得到创建的.github/workflow/mydeploy.yml文件
-
-4. 后续提交内容，将根据mydeploy.yml文件自动部署，点击actions查看部署进度。
-
->  优点：后续修改posts文件夹，site_config.ts等内容后，只需要上传即可。
+- 只需要写文章，push内容。github page自动构建后救恩那个在你的网站看到更新的内容
 
 ##### 本地构建
 
@@ -129,21 +117,28 @@ npm run build
 
 ## 主题更新
 
-#### 直接更新：建议通过 博客管理脚本.sh 完成
+主题更新前，请先完成一次上传到github，确保回到github云端的最新仓库能够避免损失。
 
-如果你的版本太旧，请移步最新仓库获得这份脚本。
+#### 直接更新（小白用）：通过 博客管理脚本.sh 完成
 
-> 这将仅保留 "posts/" "site_config.ts"  "public/"  ".github/"，其余文件将被覆盖。如果只修改了以上文件，简单更新即可。
-
-注意，如果有新特性，配置选项请查看.vitepress目录中的模板site_config_template.ts
-
-更新的文件会拉到本地，请上传至你的github仓库触发更新.
+请移步最新仓库获得这份脚本。
 
 ```
-git add . && git commit -m "update" && git push -f origin main
+git fetch upstream
+git checkout upstream/main -- 博客管理脚本.sh
+git add 博客管理脚本.sh
 ```
 
 
+
+> [!WARNING]
+> 这将仅保留 "posts/" "site_config.ts"  "public/"  ".github/"，其余文件将被覆盖。如果只修改了以上文件，简单更新即可。如果不小心出现覆盖，请使用git reset --hard origin/main 回到当前已经部署再网页上的状态。
+
+
+> [!IMPORTANT]
+> 注意，主题更新后，请查看.vitepress目录中的模板site_config_template.ts与你的配置文件区别，完成配置。
+
+更新的文件会拉到本地，请确认无误后，上传至你的github仓库触发更新.
 
 #### 手动更新，同步仓库并合并冲突
 
