@@ -18,6 +18,10 @@ const props = defineProps({
             lastUpdated: '',
             textNum: 0
         })
+    },
+    mini: {
+        type: Boolean,
+        default: false
     }
 })
 const formattedDate = computed(() => {
@@ -41,24 +45,24 @@ const formattedDate = computed(() => {
 <template>
     <div class="a-card">
         <a class="article-card" :href="props.post.link.replace('.html', '')">
-            <el-image v-if="props.post.cover" class="article-cover" :src="props.post.cover" :alt="props.post.title"
+            <el-image v-if="props.post.cover && !props.mini" class="article-cover" :src="props.post.cover" :alt="props.post.title"
                 fit="cover" lazy />
             <article>
                 <h1 class="article-title">
                     {{ props.post.title ?? 'Untitled Article' }}
                 </h1>
-                <p v-if="props.post.excerpt" class="article-descrption">
+                <p v-if="props.post.excerpt && !props.mini" class="article-descrption">
                     {{ props.post.excerpt }}
                 </p>
                 <div class="article-info" data-allow-mismatch>
-
                     <el-space wrap class="tag-group">
                         <el-tag v-for="(tag, index) in props.post.tags" :key="index" size="default" type="info"
                             effect="plain"
                             style="display: flex;justify-content: center;background-color: var(--vp-c-bg-soft);" round>
                             <i class="fa-solid fa-tag"></i>{{ tag }}
                         </el-tag>
-                        <p v-if="formattedDate" class="article-words"><i class="fa-solid fa-calendar"></i>{{ formattedDate }}</p>
+                        <p v-if="formattedDate" class="article-words"><i class="fa-solid fa-calendar"></i>{{
+                            formattedDate }}</p>
                         <i class="fa-solid fa-pen"></i>{{ props.post.textNum }}字
                         <VPDocFooterLastUpdated :lastUpdated="props.post.lastUpdated" />
                     </el-space>

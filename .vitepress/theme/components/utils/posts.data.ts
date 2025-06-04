@@ -12,7 +12,7 @@ const contentLoaderConfig = {
         const data = await pMap(
             rawData,
             async (page: any) => {
-                // console.log(item.url);
+                
                 const lastUpdated = await getLastUpdated(page.url);
                 let excerpt = page.excerpt
                 let textNum = 0
