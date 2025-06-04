@@ -86,7 +86,8 @@ update_theme() {
   echo "合并前的提交ID: $PRE_MERGE_COMMIT"  # 调试用
   echo "拉取上游更新（自动合并，冲突时使用上游版本）"
   git fetch upstream main
-  git merge -s recursive -X theirs upstream/main || true
+  git checkout upstream/main --
+
   echo "正在恢复保护的文件和目录..."
   for path in "${PROTECTED_PATHS[@]}"; do
     # 彻底删除本地目录
