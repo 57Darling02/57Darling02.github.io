@@ -7,17 +7,17 @@ PROTECTED_PATHS=(
   "posts/"
   "site_config.ts"
   "public/"
-  ".github/"
 )
 is_protected() {
-  local file="$1"
-  for protected_path in "${PROTECTED_PATHS[@]}"; do
-      if [[ "$file" == "$protected_path"* ]]; then
-          return 0
-      fi
-  done
-  return 1
+    local file="$1"
+    for protected_path in "${PROTECTED_PATHS[@]}"; do
+        if [[ "$file" == "$protected_path"* ]]; then
+            return 0
+        fi
+    done
+    return 1
 }
+
 # 上游主题仓库URL
 UPSTREAM_URL="https://github.com/57Darling02/VitePress_butterfly.git"
 # ===== 配置结束 =====
@@ -134,7 +134,7 @@ update_theme() {
 
   
   echo ""
-  echo "如有问题可回退: git reset --hard HEAD@{1}"
+  echo "如有问题可回退至云端: git reset --hard origin/main"
   echo "测试无误后推送"
 }
 
