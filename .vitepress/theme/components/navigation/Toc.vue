@@ -625,6 +625,7 @@ onBeforeUnmount(() => {
   border-radius: 9px;
   color: var(--vp-c-text-2);
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.3;
   text-decoration: none;
   transition:
@@ -673,6 +674,7 @@ onBeforeUnmount(() => {
 
 .toc-depth-0 .toc-link {
   padding-left: 2.52rem;
+  font-weight: 500;
 }
 
 .toc-depth-0 .toc-marker {

@@ -1,21 +1,28 @@
 <template>
-  <div class="a-card profile-card" :class="{ 'has-border': border }">
-    <div class="avatar-wrapper">
-      <img :src="avatarSrc" :alt="name" class="avatar" @error="handleAvatarError" />
+  <section
+    class="a-card profile-card"
+    :class="{ 'has-introduction': introduction }"
+    :aria-label="`${name} 的个人资料`"
+  >
+    <div class="profile-stage">
+      <div class="profile-panel profile-identity">
+        <div class="avatar-wrapper">
+          <img :src="avatarSrc" :alt="name" class="avatar" @error="handleAvatarError" />
+        </div>
+      </div>
+
+      <p v-if="introduction" class="profile-panel profile-introduction">
+        {{ introduction }}
+      </p>
     </div>
 
-    <div class="profile-content">
-      
-      <template v-if="hasBeforeSocialSlot">
-        <slot name="before-social" />
-      </template>
-      <template v-else>
-        <h4 class="name">{{ name }}</h4>
-        <div class="position">{{ position }}</div>
-        <p class="bio">{{ bio }}</p>
-      </template>
+    <div class="profile-footer">
+      <div class="profile-meta">
+        <p class="name">{{ name }}</p>
+        <p v-if="signature" class="signature">{{ signature }}</p>
+      </div>
 
-      <div class="social-links">
+      <nav v-if="socialLinks.length" class="social-links" :aria-label="`${name} 的社交链接`">
         <a
           v-for="(link, index) in socialLinks"
           :key="index"
@@ -27,30 +34,26 @@
         >
           <ThemeIcon :name="link.icon" :src="link.iconUrl" />
         </a>
-      </div>
+      </nav>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useSlots } from 'vue'
+import { computed, ref } from 'vue'
 import { useData } from 'vitepress'
 import type ThemeConfig from '../../types/ThemeConfig'
 import ThemeIcon from '../ThemeIcon.vue'
 
 const { theme } = useData<ThemeConfig>()
-const slots = useSlots()
 
 const {
   avatar = '',
   name = 'Unnamed',
-  position = 'Developer',
-  bio = 'Loves building and sharing.',
+  signature = '',
+  introduction = '',
   socialLinks = [],
-  border = true,
 } = theme.value
-
-const hasBeforeSocialSlot = computed(() => !!slots['before-social'])
 
 const normalizeAvatarSrc = (value: unknown) => typeof value === 'string' ? value.trim() : ''
 
@@ -96,72 +99,121 @@ const handleAvatarError = (event: Event) => {
 
 <style lang="scss" scoped>
 .profile-card {
-  padding: 10px 10px 10px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.profile-stage {
+  display: grid;
+  place-items: center;
+  min-block-size: 9.5rem;
+  padding: 1rem 1.25rem;
+}
+
+.profile-panel {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.profile-identity {
+  display: grid;
+  place-items: center;
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .avatar-wrapper {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 20px;
-  border-radius: 50%;
+  width: 5.75rem;
+  aspect-ratio: 1;
   overflow: hidden;
-  border: 3px solid var(--vp-c-brand);
-  transition: transform 0.3s ease;
+  border: 3px solid color-mix(in srgb, var(--vp-c-brand) 72%, var(--vp-c-bg));
+  border-radius: 50%;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--vp-c-brand) 20%, transparent);
 }
 
 .avatar {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.profile-content {
-  text-align: center;
+.profile-introduction {
+  margin: 0;
+  color: var(--vp-c-text-2);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  text-align: justify;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(1rem);
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.profile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-block-size: 3.875rem;
+  padding: 0.75rem 1rem 0.875rem;
+  border-top: 1px solid color-mix(in srgb, var(--vp-c-divider) 62%, transparent);
+}
+
+.profile-meta {
+  flex: 1 1 7rem;
+  min-width: 0;
 }
 
 .name {
-  margin: 0 0 8px;
-  font-size: 1.2rem;
+  margin: 0;
+  overflow: hidden;
   color: var(--vp-c-text-1);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.position {
-  color: var(--vp-c-brand);
-  font-size: 0.9rem;
-  margin-bottom: 12px;
-  font-weight: 500;
-}
-
-.bio {
+.signature {
+  margin: 0.35rem 0 0;
+  overflow: hidden;
   color: var(--vp-c-text-2);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin: 0 auto 20px;
-  max-width: 240px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  opacity: 0.72;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .social-links {
   display: flex;
-  justify-content: center;
-  gap: 16px;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  margin-left: auto;
+  gap: 0.375rem;
 }
 
 .social-item {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--vp-c-bg-alt);
-  transition: all 0.3s ease;
+  width: 2.125rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--vp-c-bg-alt) 82%, var(--vp-c-brand) 18%);
   color: var(--vp-c-text-2);
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .social-item:hover {
   background: var(--vp-c-brand);
-  color: white;
-  transform: scale(1.1);
+  color: var(--vp-c-white);
+  transform: translateY(-1px);
 }
 
 .social-item:focus-visible {
@@ -171,6 +223,47 @@ const handleAvatarError = (event: Event) => {
 
 .social-item :deep(.theme-icon) {
   font-size: 1.1rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .profile-card.has-introduction:is(:hover, :focus-within) .profile-identity {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+
+  .profile-card.has-introduction:is(:hover, :focus-within) .profile-introduction {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .profile-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-block-size: 0;
+  }
+
+  .profile-panel {
+    grid-area: auto;
+  }
+
+  .profile-introduction {
+    opacity: 1;
+    pointer-events: auto;
+    text-align: center;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-identity,
+  .profile-introduction,
+  .social-item {
+    transition: none;
+  }
 }
 
 </style>

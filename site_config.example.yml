@@ -12,7 +12,7 @@ author: "57Darling02"
 
 # Visual experience
 # isDark: null follows system, true forces dark, false forces light.
-# background accepts a color value(HEX) or a public asset path such as "/wallpaper/1.webp".
+# Leave background empty for the built-in adaptive gradient, or use a HEX color or public asset path.
 isDark: null
 background: ""
 bg_rainfall: false
@@ -37,8 +37,8 @@ lastUpdated:
 # Profile card
 avatar: "/image/image.png"
 name: "57Darling02"
-position: "NPC"
-bio: "红红火火恍恍惚惚"
+signature: "NPC"
+introduction: "红红火火恍恍惚惚"
 socialLinks:
   - name: "GitHub"
     # icon supports Lucide kebab-case names and Font Awesome fa-* classes.

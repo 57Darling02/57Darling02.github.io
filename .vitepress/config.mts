@@ -11,6 +11,7 @@ import { injectFirstPaintLoading } from './theme/utils/firstPaintLoading'
 import { createSeoConfig } from './theme/utils/seo'
 import { fontAwesomeStylesheet, hasFontAwesomeIcons } from './theme/utils/fontAwesome'
 import { createThemeIconPlugin } from './theme/utils/themeIconPlugin'
+import { createPostCoverPlugin } from './theme/utils/postCoverPlugin'
 
 const rawConfig = loadSiteConfig();
 const myconfig = rawConfig as ThemeConfig;
@@ -84,6 +85,7 @@ export default defineConfig<ThemeConfig>({
     },
     plugins: [
       createThemeIconPlugin(myconfig),
+      createPostCoverPlugin(),
       {
         name: 'first-paint-loading-dev',
         apply: 'serve',

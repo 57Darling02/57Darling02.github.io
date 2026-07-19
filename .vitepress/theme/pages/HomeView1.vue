@@ -148,7 +148,7 @@ const startTypeIt = async () => {
     speed: 100,
     breakLines: false,
     lifeLike: true,
-    loop: false,
+    loop: true,
     cursor: {
       autoStart: true,
       animation: { opacity: 0 },
@@ -272,6 +272,7 @@ onUnmounted(() => {
   margin: 1rem 0 0;
   color: var(--vp-c-text-1);
   font-size: 1.2rem;
+  font-weight: 400;
   line-height: 1.5;
   text-shadow: 0 1px 12px rgb(var(--vp-c-bg-rgb) / 0.58);
 }

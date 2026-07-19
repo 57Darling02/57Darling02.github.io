@@ -18,9 +18,8 @@ export default interface ThemeConfig {
   // 侧边简介卡
   avatar: string;
   name: string;
-  position: string;
-  bio: string;
-  border?: boolean;
+  signature: string;
+  introduction: string;
   socialLinks: SocialLink[];
   // 页脚
   footer: FooterConfig;

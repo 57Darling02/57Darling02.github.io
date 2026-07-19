@@ -1,5 +1,8 @@
 <template>
-  <div class="hero-surface" :class="`is-${appearance}`">
+  <div
+    class="hero-surface"
+    :class="[`is-${appearance}`, { 'has-default-background': isDefaultBackground }]"
+  >
     <div class="hero-surface-media" :style="backgroundStyle" aria-hidden="true">
       <img
         v-if="imageSource"
@@ -21,20 +24,21 @@
 
       <svg
         class="hero-surface-waves"
-        viewBox="0 0 1440 72"
+        viewBox="0 24 150 28"
         preserveAspectRatio="none"
         shape-rendering="auto"
       >
         <defs>
           <path
             :id="waveId"
-            d="M-240 32c160-18 320-18 480 0s320 18 480 0 320-18 480 0 320 18 480 0v72H-240Z"
+            d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18v44h-352Z"
           />
         </defs>
-        <g>
-          <use class="hero-surface-wave-layer wave-back" :href="`#${waveId}`" y="0" />
-          <use class="hero-surface-wave-layer wave-middle" :href="`#${waveId}`" y="7" />
-          <use class="hero-surface-wave-layer wave-front" :href="`#${waveId}`" y="14" />
+        <g class="hero-surface-wave-parallax">
+          <use class="hero-surface-wave-layer wave-far" :href="`#${waveId}`" x="48" y="0" />
+          <use class="hero-surface-wave-layer wave-back" :href="`#${waveId}`" x="48" y="3" />
+          <use class="hero-surface-wave-layer wave-middle" :href="`#${waveId}`" x="48" y="5" />
+          <use class="hero-surface-wave-layer wave-front" :href="`#${waveId}`" x="48" y="7" />
         </g>
       </svg>
     </div>
@@ -87,6 +91,7 @@ const imageSource = computed<ImageSource | undefined>(() => {
     return { src: themeBackgroundImage.value, kind: 'background' }
   }
 })
+const isDefaultBackground = computed(() => !imageSource.value && !themeBackgroundColor.value)
 const backgroundStyle = computed(() => ({
   backgroundColor: themeBackgroundColor.value || 'var(--hero-ground)',
 }))
@@ -116,6 +121,7 @@ watch(themeBackground, () => {
 .hero-surface {
   --hero-min-height: max(24rem, 65vh);
   --hero-ground: var(--vp-c-content-ground);
+  --hero-wave-far: color-mix(in srgb, var(--hero-ground) 84%, var(--vp-c-brand) 16%);
   --hero-wave-back: color-mix(in srgb, var(--hero-ground) 92%, var(--vp-c-brand) 8%);
   --hero-wave-middle: color-mix(in srgb, var(--hero-ground) 96%, var(--vp-c-brand) 4%);
 
@@ -136,6 +142,12 @@ watch(themeBackground, () => {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+.hero-surface.has-default-background .hero-surface-media {
+  background-image:
+    linear-gradient(120deg, rgb(255 255 255 / 0.24), transparent 48%),
+    linear-gradient(155deg, #d4e8ef 0%, #accad0 52%, #7eabb2 100%);
 }
 
 .hero-surface-media::after {
@@ -183,6 +195,21 @@ watch(themeBackground, () => {
   );
 }
 
+:global(html:not(.dark)) .hero-surface.has-default-background {
+  --hero-wave-far: #5f8d9c;
+  --hero-wave-back: #79a1aa;
+  --hero-wave-middle: #a7c4c4;
+}
+
+:global(html:not(.dark)) .hero-surface.has-default-background .hero-surface-media::after {
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.08),
+    color-mix(in srgb, var(--hero-ground) 4%, transparent) 58%,
+    color-mix(in srgb, var(--hero-ground) 6%, transparent)
+  );
+}
+
 .hero-surface-content {
   position: relative;
   z-index: 1;
@@ -195,43 +222,50 @@ watch(themeBackground, () => {
 .hero-surface-waves {
   position: absolute;
   z-index: 2;
-  bottom: -1px;
+  bottom: -0.6875rem;
   left: 0;
   width: 100%;
-  height: clamp(3rem, 6vw, 4.5rem);
+  height: 3.75rem;
 }
 
 .hero-surface-wave-layer {
   transform-box: fill-box;
-  transform-origin: center;
-  transform: scaleX(var(--wave-scale));
   will-change: transform;
 }
 
-.wave-back {
-  --wave-scale: 1.08;
+.wave-far {
+  fill: var(--hero-wave-far);
+  fill-opacity: 0.74;
+  animation: hero-wave-flow 4s cubic-bezier(0.55, 0.5, 0.45, 0.5) -2s infinite;
+}
 
+.wave-back {
   fill: var(--hero-wave-back);
-  animation: hero-wave-sway 10s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  fill-opacity: 0.52;
+  animation: hero-wave-flow 6s cubic-bezier(0.55, 0.5, 0.45, 0.5) -3s infinite;
 }
 
 .wave-middle {
-  --wave-scale: 1;
-
   fill: var(--hero-wave-middle);
-  animation: hero-wave-sway 7s cubic-bezier(0.45, 0, 0.55, 1) -3s infinite alternate-reverse;
+  fill-opacity: 0.26;
+  animation: hero-wave-flow 8s cubic-bezier(0.55, 0.5, 0.45, 0.5) -4s infinite;
 }
 
 .wave-front {
-  --wave-scale: 0.94;
-
   fill: var(--hero-ground);
-  animation: hero-wave-sway 4.5s cubic-bezier(0.45, 0, 0.55, 1) -1s infinite alternate;
+  animation: hero-wave-flow 10s cubic-bezier(0.55, 0.5, 0.45, 0.5) -5s infinite;
 }
 
 :global(.dark) .hero-surface {
+  --hero-wave-far: color-mix(in srgb, var(--hero-ground) 74%, var(--vp-c-brand) 26%);
   --hero-wave-back: color-mix(in srgb, var(--hero-ground) 82%, var(--vp-c-brand) 18%);
   --hero-wave-middle: color-mix(in srgb, var(--hero-ground) 92%, var(--vp-c-brand) 8%);
+}
+
+:global(.dark) .hero-surface.has-default-background .hero-surface-media {
+  background-image:
+    linear-gradient(120deg, rgb(94 167 145 / 0.14), transparent 48%),
+    linear-gradient(155deg, #172b2a 0%, #1b2b32 46%, #2a2936 74%, var(--hero-ground) 100%);
 }
 
 @function getShadows($count, $seed) {
@@ -279,13 +313,13 @@ $count: 250;
   }
 }
 
-@keyframes hero-wave-sway {
+@keyframes hero-wave-flow {
   from {
-    transform: translate3d(-5%, 0, 0) scaleX(var(--wave-scale));
+    transform: translate3d(-90px, 0, 0);
   }
 
   to {
-    transform: translate3d(5%, 0, 0) scaleX(var(--wave-scale));
+    transform: translate3d(85px, 0, 0);
   }
 }
 

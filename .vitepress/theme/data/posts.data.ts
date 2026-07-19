@@ -61,7 +61,7 @@ const contentLoaderConfig = {
             : false;
 
         const data = await Promise.all(docPages.map(async (page): Promise<PostSummary> => {
-            const sourceFile = getSourceMarkdownPath(page.url);
+            const sourceFile = getSourceMarkdownPath(page.url).replace(/^\/+/, '');
             const sourcePath = getMarkdownFilePath(sourceFile);
             const plainText = toExcerptText(page.src ?? "").substring(0, EXCERPT_LENGTH);
             const excerpt = `${plainText}${plainText.length >= 30 ? EXCERPT_SUFFIX : ""}`.trim();
@@ -74,6 +74,7 @@ const contentLoaderConfig = {
                 tags: normalizeTags(page.frontmatter.tags),
                 category: getPostCategory(sourceFile),
                 cover: toText(page.frontmatter.cover),
+                sourceFile,
                 ...(shouldCalculateLastUpdated
                     ? { lastUpdated: await getLastUpdated(sourcePath, useGitTimestamps) }
                     : {}),

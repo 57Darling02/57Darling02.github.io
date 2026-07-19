@@ -127,6 +127,7 @@ public/
 title: Hello World
 date: 2026-01-01
 author: Me
+cover: ./cover.webp
 layout: doc
 ---
 
@@ -134,6 +135,8 @@ layout: doc
 ```
 文章需要带 `layout: doc`：
 `layout: doc` 会进入首页、归档、标签等文章流。
+
+封面可直接引用文章仓库中的相对图片，例如 `cover: ./cover.webp` 或 `cover: ../附件/image.png`。相对路径与 Markdown 图片一样以当前文章为基准，构建时会自动生成带 hash 的静态资源；以 `/` 开头的路径仍指向 `public/`，`https://` 外链也保持可用。
 
 #### 4.2 写页面
 如果希望展示自己的页面，本文也提供VUE完成自己的页面

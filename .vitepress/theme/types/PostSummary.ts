@@ -8,6 +8,7 @@ export interface PostSummary {
   tags: string[];
   category: string;
   cover: string;
+  sourceFile: string;
   lastUpdated?: number;
   textNum: number;
 }

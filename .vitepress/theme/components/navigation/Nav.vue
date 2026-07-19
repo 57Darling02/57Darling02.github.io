@@ -76,7 +76,7 @@
                     <el-dropdown-item v-for="subitem in activeMenuItem?.children || []" :key="subitem.key" class="menu-item"
                         @click="handleMenuClick(subitem, $event)">
                         <ThemeIcon :name="subitem.icon" :src="subitem.iconUrl" />
-                        {{ subitem.label }}
+                        <span class="menu-item-label" :title="subitem.label">{{ subitem.label }}</span>
                     </el-dropdown-item>
                 </el-dropdown-menu>
             </div>
@@ -574,6 +574,7 @@ $nav-gap: 4px;
     .menu-fitem-content {
         position: relative;
         font-size: 1rem;
+        font-weight: 500;
         white-space: nowrap;
         display: inline-flex;
         align-items: center;
@@ -711,6 +712,24 @@ $nav-gap: 4px;
     border-radius: 18px;
     overflow: hidden;
     background: var(--vp-c-bg);
+}
+
+.menu-panel-shell {
+    inline-size: min(13.5rem, calc(100vw - 2rem));
+}
+
+.menu-panel-shell :deep(.menu-item) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.menu-item-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

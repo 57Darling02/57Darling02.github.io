@@ -10,7 +10,7 @@ const defaultSiteConfig = {
   lang: 'zh-CN',
   author: '',
   isDark: null,
-  background: '#FDF8F2',
+  background: '',
   bg_rainfall: false,
   home: {
     mainTitle: 'VitePress-Butterfly',
@@ -26,8 +26,8 @@ const defaultSiteConfig = {
   },
   avatar: '/image/image.png',
   name: 'VitePress-Butterfly',
-  position: 'Blog',
-  bio: '',
+  signature: 'Blog',
+  introduction: '',
   socialLinks: [],
   footer: {
     message: '',
@@ -92,8 +92,26 @@ export function loadSiteConfig() {
     console.warn('[Config Loader] posts/site_config.yml not found. Using built-in defaults.');
   }
 
+  assertNoDeprecatedProfileFields(config);
   normalizeIconReferences(config);
   return sanitizeInlineScriptValue(config);
+}
+
+const deprecatedProfileFields = {
+  position: 'signature',
+  bio: 'introduction',
+  border: '',
+} as const;
+
+function assertNoDeprecatedProfileFields(config: Record<string, unknown>) {
+  for (const [field, replacement] of Object.entries(deprecatedProfileFields)) {
+    if (!(field in config)) continue;
+
+    const guidance = replacement
+      ? ` Use "${replacement}" instead.`
+      : ' Remove it; the profile card border now follows the theme.';
+    throw new Error(`[Config Loader] "${field}" has been removed.${guidance}`);
+  }
 }
 
 function normalizeIconReferences(config: Record<string, unknown>) {

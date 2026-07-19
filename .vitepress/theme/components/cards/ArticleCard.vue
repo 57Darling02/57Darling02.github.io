@@ -5,6 +5,7 @@ import type ThemeConfig from '../../types/ThemeConfig'
 import type { PostSummary } from '../../types/PostSummary'
 import VPDocFooterLastUpdated from '../controls/VPDocFooterLastUpdated.vue'
 import ThemeIcon from '../ThemeIcon.vue'
+import { resolvePostCover } from 'virtual:post-covers'
 const { theme, lang } = useData<ThemeConfig>()
 
 const props = withDefaults(defineProps<{
@@ -27,12 +28,13 @@ const formattedDate = computed(() => {
         return 'Invalid date'
     }
 })
+const cover = computed(() => resolvePostCover(props.post.sourceFile, props.post.cover))
 </script>
 
 <template>
-    <div class="a-card">
+    <div class="a-card" id="article-card">
         <a class="article-card" :href="props.post.link.replace('.html', '')">
-            <el-image v-if="props.post.cover && !props.mini" class="article-cover" :src="props.post.cover"
+            <el-image v-if="cover && !props.mini" class="article-cover" :src="cover"
                 :alt="props.post.title" fit="cover" lazy>
                 <template #placeholder>
                     <div class="article-cover-skeleton">
@@ -71,6 +73,11 @@ const formattedDate = computed(() => {
     font-weight: 550;
 }
 
+#article-card {
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
 .article-card {
     container-type: inline-size;
     position: relative;

@@ -35,6 +35,7 @@ import VPDocFooterLastUpdated from '../controls/VPDocFooterLastUpdated.vue'
 import ThemeIcon from '../ThemeIcon.vue'
 import HeroSurface from '../HeroSurface.vue'
 import type ThemeConfig from '../../types/ThemeConfig'
+import { resolvePostCover } from 'virtual:post-covers'
 
 const { frontmatter, theme, page, lang } = useData<ThemeConfig>()
 const isMounted = ref(false)
@@ -43,9 +44,14 @@ const toText = (value: unknown, fallback = '') => value == null ? fallback : Str
 const title = computed(() => toText(frontmatter.value.title, 'Untitled Article'))
 const author = computed(() => toText(frontmatter.value.author, theme.value.author || 'Unknown Author'))
 const date = computed(() => toText(frontmatter.value.date))
-const cover = computed(() => toText(frontmatter.value.cover).trim())
 const currentPath = computed(() => normalizeRoute(page.value.relativePath))
 const post = computed(() => posts.find(post => normalizeRoute(post.link) === currentPath.value))
+const cover = computed(() => (
+  resolvePostCover(
+    post.value?.sourceFile || page.value.filePath,
+    post.value?.cover || toText(frontmatter.value.cover).trim(),
+  )
+))
 const pageLastUpdated = computed(() => {
   const value = (page.value as unknown as Record<string, unknown>).lastUpdated
   return typeof value === 'number' ? value : undefined
