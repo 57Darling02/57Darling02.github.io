@@ -42,14 +42,14 @@
         </div>
     </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { data as posts } from '../data/posts.data.ts'
 import ArticleCard from '../components/cards/ArticleCard.vue'
 
-const Tags = ref([])
-const ExclusionList = ref([])
-const AllowList = ref([])
+const Tags = ref<string[]>([])
+const ExclusionList = ref<string[]>([])
+const AllowList = ref<string[]>([])
 
 // 初始化时提取所有文章的标签（去重）
 posts.forEach(post => {

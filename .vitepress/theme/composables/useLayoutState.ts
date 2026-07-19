@@ -10,7 +10,6 @@ import {
 const MOBILE_QUERY = '(max-width: 748px)'
 
 export type LayoutState = {
-  isFocusMode: Ref<boolean>
   showNavbar: Ref<boolean>
   showFooter: Ref<boolean>
   isMobile: Ref<boolean>
@@ -21,14 +20,12 @@ export type LayoutState = {
   setNavbarVisible: (visible: boolean) => void
   setFooterVisible: (visible: boolean) => void
   startMobileListener: () => void
-  toggleFocusMode: () => void
   toggleSidebar: () => void
 }
 
 export const layoutStateKey = Symbol('layoutState') as InjectionKey<LayoutState>
 
 export function createLayoutState(): LayoutState {
-  const isFocusMode = ref(false)
   const showNavbar = ref(true)
   const showFooter = ref(false)
   const isMobile = ref(false)
@@ -53,7 +50,6 @@ export function createLayoutState(): LayoutState {
   const navCompact = computed(() => isMobile.value)
 
   return {
-    isFocusMode,
     showNavbar,
     showFooter,
     isMobile,
@@ -68,9 +64,6 @@ export function createLayoutState(): LayoutState {
       showFooter.value = visible
     },
     startMobileListener,
-    toggleFocusMode: () => {
-      isFocusMode.value = !isFocusMode.value
-    },
     toggleSidebar: () => {
       sidebarOpen.value = !sidebarOpen.value
     },

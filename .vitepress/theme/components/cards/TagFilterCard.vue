@@ -2,7 +2,7 @@
   <div class="a-card tag-filter-card">
     <div class="card-header">
       <h3 class="title">
-        <i class="fa-solid fa-tags"></i> 标签筛选
+        <ThemeIcon name="tags" /> 标签筛选
       </h3>
       <div class="actions" v-if="selectedTags.length > 0">
         <el-button link type="primary" size="small" @click="clearTags">清除</el-button>
@@ -10,23 +10,27 @@
     </div>
     
     <div class="tags-container">
-      <div v-for="tag in allTags" 
+      <button v-for="tag in allTags"
            :key="tag" 
            class="tag-item"
            :class="{ 'is-active': selectedTags.includes(tag) }"
+           type="button"
+           :aria-pressed="selectedTags.includes(tag)"
            @click="toggleTag(tag)">
         <span class="tag-name">{{ tag }}</span>
         <span class="tag-count" v-if="tagCounts[tag]">{{ tagCounts[tag] }}</span>
-      </div>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { PostSummary } from '../../types/PostSummary'
+import ThemeIcon from '../ThemeIcon.vue'
 
 const props = defineProps<{
-  posts: any[]
+  posts: PostSummary[]
   selectedTags: string[]
 }>()
 
@@ -116,6 +120,12 @@ const clearTags = () => {
   font-size: 0.9em;
   color: var(--vp-c-text-2);
   border: 1px solid transparent;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--vp-c-brand);
+    outline-offset: 2px;
+  }
 
   &:hover {
     color: var(--vp-c-brand);

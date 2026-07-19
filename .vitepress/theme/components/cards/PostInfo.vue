@@ -1,50 +1,65 @@
 <template>
-  <div class="article-header a-card" :class="{ 'is-mobile': isMobile }">
-    <div class="header-title">
-      <h1>{{ title }}</h1>
-    </div>
+  <HeroSurface class="article-header" :cover="cover">
+    <header class="article-header-content">
+      <div class="header-title">
+        <h1>{{ title }}</h1>
+      </div>
 
-    <div class="meta-info">
-      <span class="meta-item">
-        <i class="fa-solid fa-user" />
-        <span>{{ author }}</span>
-      </span>
-      <span class="divider" />
-      <a class="meta-item">
-        <i class="fa-solid fa-eye" />
-        <span><span id="busuanzi_value_page_pv">--</span>次</span>
-      </a>
-      <span class="divider" />
-      <time class="meta-item" :datetime="date">
-        <i class="fa-solid fa-upload" />
-        <span>发布于&nbsp;{{ formattedDate }}</span>
-      </time>
-      <span v-if="lastUpdated" class="divider" />
-      <VPDocFooterLastUpdated v-if="lastUpdated" class="meta-item" :lastUpdated="lastUpdated" />
-    </div>
-  </div>
+      <div class="meta-info">
+        <span class="meta-item">
+          <ThemeIcon name="user" />
+          <span>{{ author }}</span>
+        </span>
+        <span class="divider" />
+        <span class="meta-item">
+          <ThemeIcon name="eye" />
+          <span><span id="busuanzi_value_page_pv">--</span>次</span>
+        </span>
+        <span class="divider" />
+        <time class="meta-item" :datetime="date">
+          <ThemeIcon name="upload" />
+          <span>发布于&nbsp;{{ formattedDate }}</span>
+        </time>
+        <span v-if="lastUpdated" class="divider" />
+        <VPDocFooterLastUpdated v-if="lastUpdated" class="meta-item" :lastUpdated="lastUpdated" />
+      </div>
+    </header>
+  </HeroSurface>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useData } from 'vitepress'
-import { useLayoutState } from '../../composables/useLayoutState'
 import { data as posts } from '../../data/posts.data.ts'
 import VPDocFooterLastUpdated from '../controls/VPDocFooterLastUpdated.vue'
+import ThemeIcon from '../ThemeIcon.vue'
+import HeroSurface from '../HeroSurface.vue'
+import type ThemeConfig from '../../types/ThemeConfig'
 
-const { frontmatter, theme, page, lang } = useData()
-const { isMobile } = useLayoutState()
+const { frontmatter, theme, page, lang } = useData<ThemeConfig>()
 const isMounted = ref(false)
 
-const title = computed(() => frontmatter.value.title ?? 'Untitled Article')
-const author = computed(() => frontmatter.value.author ?? theme.value.author ?? 'Unknown Author')
-const date = computed(() => frontmatter.value.date ?? '')
-const currentPath = computed(() => normalizePagePath(page.value.path))
-const post = computed(() => posts.find(post => normalizePagePath(post.link) === currentPath.value))
-const lastUpdated = computed(() => post.value?.lastUpdated ?? (page.value as any).lastUpdated)
+const toText = (value: unknown, fallback = '') => value == null ? fallback : String(value)
+const title = computed(() => toText(frontmatter.value.title, 'Untitled Article'))
+const author = computed(() => toText(frontmatter.value.author, theme.value.author || 'Unknown Author'))
+const date = computed(() => toText(frontmatter.value.date))
+const cover = computed(() => toText(frontmatter.value.cover).trim())
+const currentPath = computed(() => normalizeRoute(page.value.relativePath))
+const post = computed(() => posts.find(post => normalizeRoute(post.link) === currentPath.value))
+const pageLastUpdated = computed(() => {
+  const value = (page.value as unknown as Record<string, unknown>).lastUpdated
+  return typeof value === 'number' ? value : undefined
+})
+const lastUpdated = computed(() => post.value?.lastUpdated ?? pageLastUpdated.value)
 
-function normalizePagePath(path = '') {
-  return path.replace(/\.html$/, '')
+function normalizeRoute(path = '') {
+  const normalized = String(path)
+    .replace(/[?#].*$/, '')
+    .replace(/^\/+/, '')
+    .replace(/\.(?:html|md)$/, '')
+    .replace(/(^|\/)index$/, '$1')
+
+  return normalized ? `/${normalized}` : '/'
 }
 
 const formattedDate = computed(() => {
@@ -69,41 +84,35 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.article-header {
-  --post-info-side-gap: 20px;
-
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  width: min(100%, max-content);
-  max-width: min(80%, calc(100% - var(--post-info-side-gap) * 2));
+.article-header-content {
+  width: min(calc(100% - 3rem), 900px);
   margin: 0 auto;
-  border-radius: 18px;
-  background-color: rgba(var(--vp-c-bg-rgb), 0.5);
+  padding: 4rem 0 4.5rem;
+  animation: article-header-enter 440ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .header-title {
-  margin-bottom: 1.5rem;
-  text-align: center;
+  margin: 0;
 }
 
 .header-title h1 {
   margin: 0;
-  font-weight: 400;
-  font-size: 2.5em;
-  line-height: 1.5;
+  font-size: 2.75rem;
+  font-weight: 600;
+  line-height: 1.28;
+  text-wrap: balance;
+  text-shadow: 0 1px 18px rgba(var(--vp-c-bg-rgb), 0.35);
 }
 
 .meta-info {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
   gap: 0.75rem 1rem;
+  margin-top: 1.35rem;
   color: var(--vp-c-text-2);
   font-size: 0.9rem;
+  text-shadow: 0 1px 12px rgba(var(--vp-c-bg-rgb), 0.45);
 }
 
 .meta-item {
@@ -114,8 +123,7 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.meta-item i,
-.meta-item :deep(i) {
+.meta-item :deep(.theme-icon) {
   color: var(--vp-c-brand);
   font-size: 0.95em;
   line-height: 1;
@@ -125,25 +133,47 @@ onMounted(() => {
   flex: 0 0 auto;
   width: 1px;
   height: 1em;
-  background: var(--vp-c-divider);
+  background: color-mix(in srgb, var(--vp-c-divider) 72%, transparent);
 }
 
-.article-header.is-mobile {
-  width: calc(100% - var(--post-info-side-gap) * 2);
-  max-width: none;
-  padding: 1.5rem;
+@keyframes article-header-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.article-header.is-mobile .header-title h1 {
-  font-size: 1.5rem;
+@media (max-width: 748px) {
+  .article-header-content {
+    width: calc(100% - 2rem);
+    padding: 2.5rem 0 3.75rem;
+  }
+
+  .header-title h1 {
+    font-size: 1.85rem;
+    line-height: 1.35;
+  }
+
+  .meta-info {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-top: 1.2rem;
+  }
+
+  .divider {
+    display: none;
+  }
 }
 
-.article-header.is-mobile .meta-info {
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.article-header.is-mobile .divider {
-  display: none;
+@media (prefers-reduced-motion: reduce) {
+  .article-header-content {
+    animation: none;
+  }
 }
 </style>

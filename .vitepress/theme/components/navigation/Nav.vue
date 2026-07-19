@@ -1,53 +1,81 @@
 <template>
-    <div id="nav" ref="navRef" :class="{ 'nav-hidden': !showNavbar }">
-        <div id="menu">
-            <a class="menu-fitem" href="/" @click.prevent="handleHomeClick">
-                <span>
-                    <i class="fa-solid fa-house"></i>{{ navCompact ? '' : '首页' }}
+    <div
+        id="nav"
+        ref="navRef"
+        :class="{ 'nav-compact': isCompact, 'nav-hidden': navPhase === 'hidden' }"
+        :aria-hidden="!isNavInteractive ? 'true' : undefined"
+        @mouseenter="handleNavMouseEnter"
+        @mouseleave="handleNavMouseLeave"
+    >
+        <div id="menu" :inert="!isNavInteractive || undefined">
+            <a class="menu-fitem" href="/" aria-label="首页" @click="handleLinkClick('/', $event)">
+                <span class="menu-fitem-content">
+                    <ThemeIcon name="house" />
+                    <span class="menu-label">首页</span>
                 </span>
             </a>
 
-            <a v-for="item in menuItems" :key="item.label"
-                :class="['menu-fitem', { 'menu-fitem-active': menuPanelVisible && activeMenuItem?.label === item.label }]"
-                @mouseenter="handleMenuTriggerMouseEnter(item, $event)" @mouseleave="scheduleCloseMenuPanel"
-                @click.prevent="handleMenuTriggerClick(item, $event)">
-                <span>
-                    <i :class="item.icon" class="arrow-icon"></i>
-                    {{ navCompact ? '' : item.label }}
-                </span>
-            </a>
-
-            <a class="menu-fitem menu-fitem-search" @click.prevent="handleSearchClick">
-                <span>
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    {{ navCompact ? '' : '搜索' }}
-                </span>
-            </a>
-
-            <a v-if="shouldShowMusicPlayer" ref="musicTriggerRef"
+            <button v-if="shouldShowMusicPlayer" ref="musicTriggerRef" type="button"
                 :class="['menu-fitem', 'menu-fitem-music', { 'menu-fitem-active': musicPanelVisible }]"
-                @mouseenter="openMusicPanel" @mouseleave="scheduleCloseMusicPanel" @click.prevent="handleMusicTriggerClick">
-                <span>
-                    <i class="fa-solid fa-compact-disc music-icon" :class="{ 'music-icon-rotating': isMusicPlaying }"></i>
-                    {{ navCompact ? '' : '音乐' }}
+                :aria-expanded="musicPanelVisible"
+                aria-controls="music-player-panel"
+                aria-label="音乐播放器"
+                @mouseenter="openMusicPanel" @mouseleave="scheduleCloseMusicPanel" @click="handleMusicTriggerClick">
+                <span class="menu-fitem-content">
+                    <ThemeIcon name="disc-3" class="music-icon" :class="{ 'music-icon-rotating': isMusicPlaying }" />
+                    <span class="menu-label">音乐</span>
                 </span>
-            </a>
+            </button>
 
-            <ClientOnly>
-                <VPNavBarSearch ref="searchRef" class="native-search-host" />
-            </ClientOnly>
+            <template v-for="item in menuItems" :key="item.label">
+                <button
+                    v-if="item.children?.length"
+                    type="button"
+                    :class="['menu-fitem', { 'menu-fitem-active': menuPanelVisible && activeMenuItem?.label === item.label }]"
+                    :aria-expanded="menuPanelVisible && activeMenuItem?.label === item.label"
+                    aria-controls="menu-panel"
+                    aria-haspopup="menu"
+                    :aria-label="item.label"
+                    @mouseenter="handleMenuTriggerMouseEnter(item, $event)"
+                    @mouseleave="scheduleCloseMenuPanel"
+                    @click="handleMenuTriggerClick(item, $event)"
+                >
+                    <span class="menu-fitem-content">
+                        <ThemeIcon :name="item.icon" :src="item.iconUrl" class="arrow-icon" />
+                        <span class="menu-label">{{ item.label }}</span>
+                    </span>
+                </button>
+                <a
+                    v-else
+                    class="menu-fitem"
+                    :href="item.link || undefined"
+                    :target="getLinkTarget(item.link)"
+                    :rel="getLinkRel(item.link)"
+                    :aria-label="item.label"
+                    :aria-disabled="!item.link || undefined"
+                    @click="handleLinkClick(item.link, $event)"
+                >
+                    <span class="menu-fitem-content">
+                        <ThemeIcon :name="item.icon" :src="item.iconUrl" class="arrow-icon" />
+                        <span class="menu-label">{{ item.label }}</span>
+                    </span>
+                </a>
+            </template>
+
+            <VPNavBarSearch class="menu-fitem menu-fitem-search" />
         </div>
     </div>
 
     <el-dropdown ref="menuDropdownRef" :virtual-ref="menuVirtualTriggerRef" :popper-style="popperStyle"
+        :disabled="!isNavInteractive"
         :show-arrow="false" :hide-on-click="false" :popper-options="menuPopperOptions" virtual-triggering trigger="click"
         placement="bottom-start" @visible-change="onMenuPanelVisibleChange">
         <template #dropdown>
-            <div class="menu-panel-shell" @mouseenter="cancelCloseMenuPanel" @mouseleave="scheduleCloseMenuPanel">
+            <div id="menu-panel" class="menu-panel-shell" @mouseenter="cancelCloseMenuPanel" @mouseleave="scheduleCloseMenuPanel">
                 <el-dropdown-menu>
                     <el-dropdown-item v-for="subitem in activeMenuItem?.children || []" :key="subitem.key" class="menu-item"
-                        @click="handleMenuClick(subitem)">
-                        <i :class="subitem.icon"></i>
+                        @click="handleMenuClick(subitem, $event)">
+                        <ThemeIcon :name="subitem.icon" :src="subitem.iconUrl" />
                         {{ subitem.label }}
                     </el-dropdown-item>
                 </el-dropdown-menu>
@@ -56,10 +84,11 @@
     </el-dropdown>
 
     <el-dropdown v-if="shouldShowMusicPlayer" ref="musicDropdownRef" :virtual-ref="musicVirtualTriggerRef" :popper-style="popperStyle"
+        :disabled="!isNavInteractive"
         :show-arrow="false" :hide-on-click="false" :popper-options="musicPopperOptions" virtual-triggering trigger="click"
         placement="bottom-start" @visible-change="onMusicPanelVisibleChange">
         <template #dropdown>
-            <div class="music-player-shell" @mouseenter="cancelCloseMusicPanel" @mouseleave="scheduleCloseMusicPanel">
+            <div id="music-player-panel" class="music-player-shell" @mouseenter="cancelCloseMusicPanel" @mouseleave="scheduleCloseMusicPanel">
                 <APlayerWidget :url="musicPlayer.url" :name="musicPlayer.name" :artist="musicPlayer.artist"
                     :cover="musicPlayer.cover" :autoplay="musicPlayer.autoplay" :volume="musicPlayer.volume"
                     @playing-change="isMusicPlaying = $event" />
@@ -72,26 +101,42 @@
 import type { DropdownInstance } from 'element-plus'
 import { useData, useRouter } from 'vitepress'
 import { VPNavBarSearch } from 'vitepress/theme'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import type { MenuChildItem, MenuItem } from '../../types/ThemeConfig'
 import type ThemeConfig from '../../types/ThemeConfig'
-import APlayerWidget from '../player/APlayerWidget.vue'
 import { useLayoutState } from '../../composables/useLayoutState'
+import ThemeIcon from '../ThemeIcon.vue'
 
 const { theme } = useData<ThemeConfig>()
 const router = useRouter()
 const { showNavbar, navCompact } = useLayoutState()
-const menuItems = computed(() => (theme.value.menuItems || []) as any[])
+const menuItems = computed(() => theme.value.menuItems)
+const APlayerWidget = defineAsyncComponent(() => import('../player/APlayerWidget.vue'))
+
+type NavPhase = 'expanded' | 'compact' | 'hidden'
+
+const COLLAPSE_DURATION = 150
+const COMPACT_SETTLE_DURATION = 60
+const REVEAL_DURATION = 320
 
 const navRef = ref<HTMLElement | null>(null)
+const navPhase = ref<NavPhase>(navCompact.value ? 'compact' : 'expanded')
+const isCompact = computed(() => navCompact.value || navPhase.value !== 'expanded')
+const navHovered = ref(false)
 const menuDropdownRef = ref<DropdownInstance>()
 const menuPanelVisible = ref(false)
-const activeMenuItem = ref<any | null>(null)
+const activeMenuItem = ref<MenuItem | null>(null)
 
 const musicDropdownRef = ref<DropdownInstance>()
 const musicPanelVisible = ref(false)
 const isMusicPlaying = ref(false)
 const musicTriggerRef = ref<HTMLElement | null>(null)
-const searchRef = ref<InstanceType<typeof VPNavBarSearch> | null>(null)
+const isNavInteractive = computed(() => (
+    navPhase.value !== 'hidden'
+    || navHovered.value
+    || menuPanelVisible.value
+    || musicPanelVisible.value
+))
 
 const menuTriggerRect = ref(
     DOMRect.fromRect({
@@ -134,6 +179,83 @@ const musicPopperOptions = {
 
 let menuCloseTimer: ReturnType<typeof setTimeout> | null = null
 let musicCloseTimer: ReturnType<typeof setTimeout> | null = null
+let navPhaseTimer: ReturnType<typeof setTimeout> | null = null
+let navPhaseTimerTarget: Extract<NavPhase, 'expanded' | 'hidden'> | null = null
+let navMotionVersion = 0
+let motionMediaQuery: MediaQueryList | null = null
+
+const prefersReducedMotion = () => (
+    typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+)
+
+const clearNavPhaseTimer = () => {
+    if (navPhaseTimer) {
+        clearTimeout(navPhaseTimer)
+        navPhaseTimer = null
+    }
+    navPhaseTimerTarget = null
+}
+
+const syncNavPhase = (visible: boolean, viewportCompact: boolean) => {
+    const previousPhase = navPhase.value
+    const pendingTarget = navPhaseTimerTarget
+    clearNavPhaseTimer()
+    const version = ++navMotionVersion
+
+    if (viewportCompact) {
+        navHovered.value = false
+        navPhase.value = visible ? 'compact' : 'hidden'
+        return
+    }
+
+    if (prefersReducedMotion()) {
+        navPhase.value = visible ? 'expanded' : 'hidden'
+        return
+    }
+
+    if (!visible) {
+        if (previousPhase === 'hidden') return
+        if (pendingTarget === 'expanded') {
+            navPhase.value = 'hidden'
+            return
+        }
+
+        navPhase.value = 'compact'
+        navPhaseTimerTarget = 'hidden'
+        navPhaseTimer = setTimeout(() => {
+            navPhaseTimer = null
+            navPhaseTimerTarget = null
+            if (version === navMotionVersion && !showNavbar.value) {
+                navPhase.value = 'hidden'
+            }
+        }, COLLAPSE_DURATION + COMPACT_SETTLE_DURATION)
+        return
+    }
+
+    const wasHidden = previousPhase === 'hidden'
+    navPhase.value = 'compact'
+    if (!wasHidden) {
+        navPhase.value = 'expanded'
+        return
+    }
+
+    navPhaseTimerTarget = 'expanded'
+    navPhaseTimer = setTimeout(() => {
+        navPhaseTimer = null
+        navPhaseTimerTarget = null
+        if (version === navMotionVersion && showNavbar.value) {
+            navPhase.value = 'expanded'
+        }
+    }, REVEAL_DURATION + COMPACT_SETTLE_DURATION)
+}
+
+const measureLabelWidths = async () => {
+    await nextTick()
+    navRef.value?.querySelectorAll<HTMLElement>('.menu-label').forEach((label) => {
+        label.style.setProperty('--label-width', `${label.scrollWidth}px`)
+    })
+}
 
 const defaultMusicPlayer = {
     name: 'Music',
@@ -170,34 +292,66 @@ const musicPlayer = computed(() => {
 })
 const shouldShowMusicPlayer = computed(() => musicPlayer.value.enabled && Boolean(musicPlayer.value.url))
 
+const handleMotionPreferenceChange = () => {
+    syncNavPhase(showNavbar.value, navCompact.value)
+}
+
+const handleNavMouseEnter = () => {
+    if (!navCompact.value) navHovered.value = true
+}
+
+const handleNavMouseLeave = () => {
+    navHovered.value = false
+}
+
 const isModifiedEvent = (event?: MouseEvent) => {
     if (!event) return false
     return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
 }
 
+const getUrl = (link: string) => new URL(
+    link,
+    typeof window === 'undefined' ? 'http://localhost' : window.location.href,
+)
+
+const isInternalLink = (link: string) => {
+    const currentOrigin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin
+    return getUrl(link).origin === currentOrigin
+}
+
+const getLinkTarget = (link?: string) => link && !isInternalLink(link) ? '_blank' : undefined
+const getLinkRel = (link?: string) => link && !isInternalLink(link) ? 'noopener noreferrer' : undefined
+
 const navigateTo = (link: string, event?: MouseEvent) => {
     if (typeof window === 'undefined') return
 
-    const targetUrl = new URL(link, window.location.href)
-    const isInternalLink = targetUrl.origin === window.location.origin
+    const targetUrl = getUrl(link)
+    const internal = isInternalLink(link)
     const targetPath = `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`
 
-    if (isInternalLink && !isModifiedEvent(event)) {
+    if (internal && !isModifiedEvent(event)) {
         void router.go(targetPath)
         return
     }
 
-    const targetWindow = isInternalLink ? '_self' : '_blank'
-    window.open(targetUrl.toString(), targetWindow, isInternalLink ? undefined : 'noopener,noreferrer')
+    const targetWindow = internal ? '_self' : '_blank'
+    window.open(targetUrl.toString(), targetWindow, internal ? undefined : 'noopener,noreferrer')
 }
 
-const handleHomeClick = (event: MouseEvent) => {
-    navigateTo('/', event)
+const handleLinkClick = (link: string | undefined, event: MouseEvent) => {
+    if (!link) {
+        event.preventDefault()
+        return
+    }
+
+    if (!isInternalLink(link) || isModifiedEvent(event)) return
+
+    event.preventDefault()
+    void router.go(`${getUrl(link).pathname}${getUrl(link).search}${getUrl(link).hash}`)
 }
 
-const handleMenuClick = (item: any, event?: MouseEvent) => {
+const handleMenuClick = (item: MenuChildItem, event?: MouseEvent) => {
     closeMenuPanel()
-    if (item.children?.length) return
     if (!item.link) return
 
     navigateTo(item.link, event)
@@ -233,7 +387,7 @@ const scheduleCloseMenuPanel = () => {
     menuCloseTimer = setTimeout(closeMenuPanel, 140)
 }
 
-const openMenuPanel = (item: any, triggerEl: HTMLElement) => {
+const openMenuPanel = (item: MenuItem, triggerEl: HTMLElement) => {
     if (!item.children?.length) return
     cancelCloseMenuPanel()
     activeMenuItem.value = item
@@ -241,17 +395,12 @@ const openMenuPanel = (item: any, triggerEl: HTMLElement) => {
     menuDropdownRef.value?.handleOpen()
 }
 
-const handleMenuTriggerMouseEnter = (item: any, event: MouseEvent) => {
+const handleMenuTriggerMouseEnter = (item: MenuItem, event: MouseEvent) => {
     openMenuPanel(item, event.currentTarget as HTMLElement)
 }
 
-const handleMenuTriggerClick = (item: any, event: MouseEvent) => {
+const handleMenuTriggerClick = (item: MenuItem, event: MouseEvent) => {
     const triggerEl = event.currentTarget as HTMLElement
-    if (!item.children?.length) {
-        handleMenuClick(item)
-        return
-    }
-
     const isSameTrigger = activeMenuItem.value?.label === item.label
     if (menuPanelVisible.value && isSameTrigger) {
         closeMenuPanel()
@@ -279,7 +428,13 @@ const closeMusicPanel = () => {
 
 const blurNavFocus = () => {
     const activeElement = document.activeElement
-    if (activeElement instanceof HTMLElement && navRef.value?.contains(activeElement)) {
+    const focusOwners = [
+        navRef.value,
+        document.getElementById('menu-panel'),
+        document.getElementById('music-player-panel'),
+    ]
+
+    if (activeElement instanceof HTMLElement && focusOwners.some((owner) => owner?.contains(activeElement))) {
         activeElement.blur()
     }
 }
@@ -304,11 +459,6 @@ const handleMusicTriggerClick = () => {
     openMusicPanel()
 }
 
-const handleSearchClick = () => {
-    const searchEl = searchRef.value?.$el as HTMLElement | undefined
-    searchEl?.querySelector<HTMLButtonElement>('button')?.click()
-}
-
 const onMusicPanelVisibleChange = (visible: boolean) => {
     musicPanelVisible.value = visible
 }
@@ -320,7 +470,31 @@ watch(showNavbar, (visible) => {
     blurNavFocus()
 })
 
+watch([showNavbar, navCompact], ([visible, viewportCompact]) => {
+    syncNavPhase(visible, viewportCompact)
+}, {
+    immediate: true,
+    flush: 'sync',
+})
+
+watch([menuItems, shouldShowMusicPlayer], () => {
+    void measureLabelWidths()
+})
+
+onMounted(() => {
+    void measureLabelWidths()
+
+    motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    motionMediaQuery.addEventListener('change', handleMotionPreferenceChange)
+    if ('fonts' in document) {
+        void document.fonts.ready.then(measureLabelWidths)
+    }
+})
+
 onBeforeUnmount(() => {
+    clearNavPhaseTimer()
+    motionMediaQuery?.removeEventListener('change', handleMotionPreferenceChange)
+    motionMediaQuery = null
     cancelCloseMenuPanel()
     cancelCloseMusicPanel()
 })
@@ -329,7 +503,6 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 $nav-height: var(--nav-height);
 $border-radius: 50px;
-$transition-time: 0.5s;
 $nav-gap: 4px;
 
 #nav {
@@ -349,14 +522,24 @@ $nav-gap: 4px;
     padding: 0 20px;
     display: flex;
     overflow: hidden;
-    transition: all $transition-time ease;
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
 
     &.nav-hidden {
-        transform: translateY(-100%) translateX(-50%);
+        transform: translate(-50%, calc(-100% - #{$nav-gap}));
+        transition-duration: 260ms;
+        transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
     }
 
-    &:hover {
-        transform: translateX(-50%);
+    @media (min-width: 749px) {
+        &.nav-hidden {
+            transform: translate(-50%, -100%);
+        }
+
+        &.nav-hidden:hover {
+            transform: translateX(-50%);
+            transition-duration: 180ms;
+            transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+        }
     }
 }
 
@@ -366,11 +549,6 @@ $nav-gap: 4px;
     gap: 6px;
     height: 100%;
     margin: 0 auto;
-    transition: all $transition-time ease;
-
-    [class*='el-']:focus-visible {
-        outline: none !important;
-    }
 
     .menu-fitem {
         position: relative;
@@ -379,11 +557,21 @@ $nav-gap: 4px;
         justify-content: center;
         line-height: 1;
         padding: 8px 10px;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
         text-decoration: none;
         user-select: none;
     }
 
-    .menu-fitem span {
+    .menu-fitem:focus-visible {
+        outline: 2px solid var(--vp-c-brand);
+        outline-offset: 2px;
+    }
+
+    .menu-fitem-content {
         position: relative;
         font-size: 1rem;
         white-space: nowrap;
@@ -391,9 +579,23 @@ $nav-gap: 4px;
         align-items: center;
         gap: 6px;
         padding-bottom: 3px;
+        transition: gap 210ms cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .menu-fitem span::after {
+    .menu-label {
+        box-sizing: border-box;
+        display: inline-block;
+        min-width: 0;
+        width: var(--label-width);
+        overflow: hidden;
+        opacity: 1;
+        white-space: nowrap;
+        transition:
+            width 210ms cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 120ms ease-out 60ms;
+    }
+
+    .menu-fitem-content::after {
         content: '';
         position: absolute;
         left: 0;
@@ -408,8 +610,8 @@ $nav-gap: 4px;
         pointer-events: none;
     }
 
-    .menu-fitem:hover span::after,
-    .menu-fitem.menu-fitem-active span::after {
+    .menu-fitem:hover .menu-fitem-content::after,
+    .menu-fitem.menu-fitem-active .menu-fitem-content::after {
         transform: scaleX(1);
     }
 
@@ -434,34 +636,62 @@ $nav-gap: 4px;
     }
 
     .menu-fitem-search {
-        cursor: pointer;
+        align-self: center;
+        flex: 0 0 auto;
+        padding: 0;
+
+        :deep(.VPNavBarSearchButton) {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            font: inherit;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        :deep(.VPNavBarSearchButton .text),
+        :deep(.VPNavBarSearchButton .keys) {
+            display: none;
+        }
+
+        :deep(.VPNavBarSearchButton .vpi-search) {
+            display: block;
+            margin-bottom: 3px;
+            transform-origin: center;
+            transition: transform 0.2s ease;
+        }
+
+        :deep(.VPNavBarSearchButton:hover .vpi-search) {
+            transform: scale(1.14);
+        }
+
+        :deep(.VPNavBarSearchButton:focus-visible) {
+            outline: 2px solid var(--vp-c-brand);
+            outline-offset: 2px;
+        }
+    }
+}
+
+#nav.nav-compact {
+    #menu .menu-fitem-content {
+        gap: 0;
+        transition: gap 150ms cubic-bezier(0.4, 0, 1, 1);
     }
 
-    .search-icon {
-        transform-origin: center;
-        transition: transform 0.2s ease;
-    }
-
-    .menu-fitem-search:hover .search-icon {
-        transform: scale(1.18);
-    }
-
-    .native-search-host {
-        position: absolute;
-        flex: 0 0 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    #menu .menu-label {
         width: 0;
-        height: 0;
-        overflow: visible;
-    }
-
-    .native-search-host :deep(.VPNavBarSearchButton) {
-        position: absolute;
-        width: 1px;
-        height: 1px;
         opacity: 0;
-        pointer-events: none;
+        transition:
+            width 150ms cubic-bezier(0.4, 0, 1, 1),
+            opacity 80ms ease-in;
     }
 }
 
@@ -481,5 +711,28 @@ $nav-gap: 4px;
     border-radius: 18px;
     overflow: hidden;
     background: var(--vp-c-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #nav,
+    #nav.nav-hidden,
+    #nav.nav-hidden:hover,
+    #menu .menu-fitem-content,
+    #menu .menu-label,
+    #nav.nav-compact #menu .menu-fitem-content,
+    #nav.nav-compact #menu .menu-label {
+        transition: none;
+    }
+}
+
+@media (max-width: 748px) {
+    #nav #menu .menu-fitem-content {
+        gap: 0;
+    }
+
+    #nav #menu .menu-label {
+        width: 0;
+        opacity: 0;
+    }
 }
 </style>

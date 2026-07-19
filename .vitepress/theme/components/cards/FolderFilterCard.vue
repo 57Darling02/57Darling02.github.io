@@ -2,7 +2,7 @@
   <div class="a-card folder-filter-card">
     <div class="card-header">
       <h3 class="title">
-        <i class="fa-solid fa-folder-tree"></i> 目录筛选
+        <ThemeIcon name="folder-tree" /> 目录筛选
         <span class="title-count">{{ posts.length }}</span>
       </h3>
       <div class="actions" v-if="selectedFolder">
@@ -11,26 +11,37 @@
     </div>
 
     <div class="folder-tree">
-      <button
+      <div
         v-for="node in visibleFolders"
         :key="node.path"
+        :id="getFolderRowId(node.path)"
         class="folder-row"
         :class="{ 'is-active': node.path === selectedFolder }"
         :style="{ paddingLeft: `${8 + node.level * 14}px` }"
-        type="button"
-        @click="selectFolder(node.path)"
       >
-        <span
+        <button
+          v-if="node.children.length"
           class="folder-toggle"
-          :class="{ 'is-hidden': node.children.length === 0 }"
-          @click.stop="toggleFolder(node.path)"
+          type="button"
+          :aria-expanded="isExpanded(node.path)"
+          :aria-controls="getChildRowIds(node)"
+          :aria-label="`${isExpanded(node.path) ? '收起' : '展开'} ${node.label}`"
+          @click="toggleFolder(node.path)"
         >
-          <i :class="isExpanded(node.path) ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'"></i>
-        </span>
-        <i :class="getFolderIcon(node)"></i>
-        <span class="folder-name">{{ node.label }}</span>
-        <span class="folder-count">{{ node.count }}</span>
-      </button>
+          <ThemeIcon :name="isExpanded(node.path) ? 'chevron-down' : 'chevron-right'" size="14" />
+        </button>
+        <span v-else class="folder-toggle-spacer" aria-hidden="true" />
+        <button
+          class="folder-select"
+          type="button"
+          :aria-pressed="node.path === selectedFolder"
+          @click="selectFolder(node.path)"
+        >
+          <ThemeIcon :name="getFolderIcon(node)" />
+          <span class="folder-name">{{ node.label }}</span>
+          <span class="folder-count">{{ node.count }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -38,6 +49,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { DEFAULT_POST_CATEGORY } from '../../utils/postCategory'
+import type { PostSummary } from '../../types/PostSummary'
+import ThemeIcon from '../ThemeIcon.vue'
 
 type FolderNode = {
   children: FolderNode[]
@@ -48,7 +61,7 @@ type FolderNode = {
 }
 
 const props = defineProps<{
-  posts: any[]
+  posts: PostSummary[]
   selectedFolder: string
 }>()
 
@@ -124,6 +137,11 @@ const visibleFolders = computed(() => {
 
 const isExpanded = (path: string) => expandedFolders.value.has(path)
 
+const getFolderRowId = (path: string) => `folder-row-${encodeURIComponent(path)}`
+const getChildRowIds = (node: FolderNode) => node.children
+  .map((child) => getFolderRowId(child.path))
+  .join(' ')
+
 const toggleFolder = (path: string) => {
   const next = new Set(expandedFolders.value)
   if (next.has(path)) {
@@ -151,8 +169,8 @@ const expandAncestors = (folder: string) => {
 }
 
 const getFolderIcon = (node: FolderNode) => {
-  if (node.path === DEFAULT_POST_CATEGORY) return 'fa-solid fa-file-lines'
-  return isExpanded(node.path) ? 'fa-solid fa-folder-open' : 'fa-solid fa-folder'
+  if (node.path === DEFAULT_POST_CATEGORY) return 'file-text'
+  return isExpanded(node.path) ? 'folder-open' : 'folder'
 }
 
 watch(() => props.selectedFolder, expandAncestors, { immediate: true })
@@ -202,33 +220,18 @@ watch(() => props.selectedFolder, expandAncestors, { immediate: true })
 .folder-row {
   width: 100%;
   min-width: 0;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
   color: var(--vp-c-text-2);
-  cursor: pointer;
-  display: grid;
-  grid-template-columns: 18px 18px minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 8px;
-  text-align: left;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
-
-  &:hover {
-    color: var(--vp-c-brand);
-    background: var(--vp-c-bg);
-    border-color: var(--vp-c-brand);
-  }
 
   &.is-active {
-    color: white;
-    background: var(--vp-c-brand);
-    border-color: var(--vp-c-brand);
-    font-weight: 600;
+    .folder-select {
+      color: white;
+      background: var(--vp-c-brand);
+      border-color: var(--vp-c-brand);
+      font-weight: 600;
+    }
 
     .folder-count {
       background: rgba(255, 255, 255, 0.2);
@@ -247,15 +250,60 @@ watch(() => props.selectedFolder, expandAncestors, { immediate: true })
   justify-content: center;
   width: 18px;
   height: 18px;
+  padding: 0;
+  border: 0;
   border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
   font-size: 11px;
 
   &:hover {
     background: rgba(64, 158, 255, 0.12);
   }
 
-  &.is-hidden {
-    visibility: hidden;
+  &:focus-visible {
+    outline: 2px solid var(--vp-c-brand);
+    outline-offset: 2px;
+  }
+
+}
+
+.folder-toggle-spacer {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.folder-select {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  text-align: left;
+  font: inherit;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    color: var(--vp-c-brand);
+    background: var(--vp-c-bg);
+    border-color: var(--vp-c-brand);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--vp-c-brand);
+    outline-offset: 2px;
   }
 }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useData } from 'vitepress'
+import ThemeIcon from '../ThemeIcon.vue'
 
 const { theme, lang } = useData()
 
@@ -35,7 +36,7 @@ onMounted(() => {
 
 <template>
   <span v-if="theme?.lastUpdated.use && hasValidDate" class="VPLastUpdated">
-    <time :datetime="isoDatetime"><i class="fa-solid fa-calendar-lines-pen"></i>&nbsp;&#x4FEE;&#x6539;&#x4E8E;&nbsp;{{ datetime }}</time>
+    <time :datetime="isoDatetime"><ThemeIcon name="calendar-clock" />&nbsp;&#x4FEE;&#x6539;&#x4E8E;&nbsp;{{ datetime }}</time>
   </span>
 </template>
 

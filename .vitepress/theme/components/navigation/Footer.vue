@@ -2,19 +2,19 @@
     <div class="footer a-card" :class="{ 'footer-hidden': !showFooter }">
         <el-text style="width: 100%;text-align: center;">
 
-            <i v-if="page?.title"><i class="fa-solid fa-location-dot"></i>{{formattedFilePath}} - {{ page?.title }}</i>
-            <i v-else>&nbsp;{{ message }}</i>
+            <span v-if="page?.title" class="footer-location"><ThemeIcon name="map-pin" />{{formattedFilePath}} {{formattedFilePath?"-":""}} {{ page?.title }}</span>
+            <span v-else>&nbsp;{{ message }}</span>
         </el-text>
         
-        <el-text style="width: 100%;text-align: center;" size="small">
+        <!-- <el-text style="width: 100%;text-align: center;" size="small">
             <span id="vercount_container_site_pv" style='display:none'>
                 本站总访问量<span id="vercount_value_site_pv" />次
                 &nbsp;|&nbsp;
             </span>
-            <a v-if="createdTime">
+            <span v-if="createdTime">
                 <span class="gear-icon">⏣</span>&nbsp;博客已运行:{{ isMounted ? formattedTime : '' }}
-            </a>
-        </el-text>
+            </span>
+        </el-text> -->
         
         <el-text size="default" v-if="copyright">
             {{ copyright }}
@@ -27,6 +27,7 @@ import { useData } from 'vitepress'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useLayoutState } from '../../composables/useLayoutState'
 import { getPostFolder } from '../../utils/postCategory'
+import ThemeIcon from '../ThemeIcon.vue'
 
 const { theme, page } = useData()
 const footer = theme.value.footer || {}
@@ -55,8 +56,11 @@ const formattedFilePath = computed(() => {
 let intervalId: number | null = null
 
 onMounted(() => {
-    const startTime = new Date(createdTime).getTime()
     isMounted.value = true
+    if (!createdTime) return
+
+    const startTime = new Date(createdTime).getTime()
+    if (!Number.isFinite(startTime)) return
 
     // 更新时间的函数
     const updateTime = () => {
@@ -126,5 +130,11 @@ onUnmounted(() => {
     .gear-icon:hover {
         animation-play-state: paused;
     }
+}
+
+.footer-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 </style>

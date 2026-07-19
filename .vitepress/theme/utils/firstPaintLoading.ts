@@ -55,6 +55,14 @@ const firstPaintLoadingStyle = `
       --first-paint-loading-accent: #e5e7eb;
     }
   }
+  @media (prefers-reduced-motion: reduce) {
+    #first-paint-loading {
+      transition: none;
+    }
+    #first-paint-loading .first-paint-loading-mark {
+      animation: none;
+    }
+  }
 `;
 
 const firstPaintLoadingHtml = `

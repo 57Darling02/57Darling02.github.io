@@ -20,6 +20,7 @@ export default interface ThemeConfig {
   name: string;
   position: string;
   bio: string;
+  border?: boolean;
   socialLinks: SocialLink[];
   // 页脚
   footer: FooterConfig;
@@ -29,51 +30,60 @@ export default interface ThemeConfig {
   musicTrack?: MusicTrackConfig;
   comments?: CommentsConfig;
   friendlink?: FriendLink[];
+  outline?: Outline;
+  lightModeSwitchTitle?: string;
+  darkModeSwitchTitle?: string;
 }
 
 
 // 定义子类型
-interface HomeConfig {
+export interface HomeConfig {
   mainTitle: string;
   subTitles: string[];
-  firstViewHeight: number,
 }
 
-interface LastUpdatedConfig {
+export interface LastUpdatedConfig {
   use: boolean;
+  formatOptions?: Intl.DateTimeFormatOptions & {
+    forceLocale?: boolean;
+  };
 }
 
-interface SearchConfig {
+export interface SearchConfig {
   provider: 'local' | 'algolia';
   options?: Record<string, unknown>;
 }
 
-interface SocialLink {
+export interface IconReference {
+  icon?: string;
+  iconUrl?: string;
+}
+
+export interface SocialLink extends IconReference {
   name: string;
-  icon: string;
   url: string;
 }
 
-interface FooterConfig {
+export interface FooterConfig {
   message?: string;
   copyright?: string;
   createdTime?: string;
 }
 
-interface MenuChildItem {
+export interface MenuChildItem extends IconReference {
   key: string;
   label: string;
-  icon: string;
   link: string;
 }
 
-interface MenuItem {
+export interface MenuItem extends IconReference {
   label: string;
-  icon: string;
-  children: MenuChildItem[];
+  children?: MenuChildItem[];
+  key?: string;
+  link?: string;
 }
 
-interface MusicPlayerConfig {
+export interface MusicPlayerConfig {
   enabled: boolean;
   url?: string;
   name?: string;
@@ -83,7 +93,7 @@ interface MusicPlayerConfig {
   volume?: number;
 }
 
-interface MusicTrackConfig {
+export interface MusicTrackConfig {
   url: string;
   name: string;
   artist: string;
@@ -92,14 +102,14 @@ interface MusicTrackConfig {
   volume?: number;
 }
 
-interface FriendLink {
+export interface FriendLink {
   Name: string;
   Url: string;
   Avatar: string;
   Desc: string;
 }
 
-interface CommentsConfig {
+export interface CommentsConfig {
   enabled: boolean;
   host?: string;
   repo?: string;
@@ -116,3 +126,6 @@ interface CommentsConfig {
   lang?: string;
   loading?: string;
 }
+
+export type OutlineLevel = number | [number, number] | 'deep';
+export type Outline = false | OutlineLevel | { level?: OutlineLevel };

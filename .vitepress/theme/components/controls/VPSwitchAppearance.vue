@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { inject, nextTick, provide, ref, watchPostEffect } from 'vue'
+import { computed, nextTick } from 'vue'
 import { useData } from 'vitepress'
-import VPSwitch from './VPSwitch.vue'
+import ThemeIcon from '../ThemeIcon.vue'
 
 const { isDark, theme } = useData()
 
@@ -40,18 +40,24 @@ const toggleAppearance = async (e?: MouseEvent) => {
     }
   )
 }
-provide('toggle-appearance', toggleAppearance)
-
-const switchTitle = ref('')
-
-watchPostEffect(() => {
-  switchTitle.value = isDark.value
+const switchTitle = computed(() => isDark.value
     ? theme.value.lightModeSwitchTitle || 'Switch to light theme'
-    : theme.value.darkModeSwitchTitle || 'Switch to dark theme'
-})
+    : theme.value.darkModeSwitchTitle || 'Switch to dark theme')
 </script>
 
 <template>
-    <i class="fa-solid fa-sun-bright" @click="toggleAppearance" v-if="isDark"></i>
-    <i class="fa-solid fa-moon" @click="toggleAppearance" v-else></i>
+    <button class="control-icon-button" type="button" :title="switchTitle" :aria-label="switchTitle" @click="toggleAppearance">
+      <ThemeIcon :name="isDark ? 'sun' : 'moon'" />
+    </button>
 </template>
+
+<style scoped>
+.control-icon-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+</style>

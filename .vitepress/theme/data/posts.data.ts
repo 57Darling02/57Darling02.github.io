@@ -1,12 +1,17 @@
-import { createContentLoader } from "vitepress";
+import {
+    cacheAllGitTimestamps,
+    createContentLoader,
+    getGitTimestamp,
+    type ContentData,
+} from "vitepress";
+import fs from "node:fs";
+import path from "node:path";
+import type ThemeConfig from "../types/ThemeConfig";
+import type { PostDate, PostSummary } from "../types/PostSummary";
 import { loadSiteConfig } from "../utils/configLoader";
-import pMap from "p-map";
-
-const theme = loadSiteConfig() as any;
-import fs from "fs";
-import path from "path";
-import { spawn } from "cross-spawn";
 import { getPostCategory } from "../utils/postCategory";
+
+const theme = loadSiteConfig() as ThemeConfig;
 
 const EXCERPT_LENGTH = 100;
 const EXCERPT_SUFFIX = "......";
@@ -17,6 +22,16 @@ const excerptCleanupRules: Array<[RegExp, string]> = [
     [/\[([^\]]+)\]\([^)]+\)/g, "$1"],
     [/(\*\*|__)(.*?)\1/g, "$2"],
 ];
+
+interface VitePressConfig {
+    srcDir: string;
+    rewrites: {
+        map: Record<string, string | undefined>;
+        inv: Record<string, string | undefined>;
+    };
+}
+
+let gitTimestampCache: Promise<boolean> | undefined;
 
 function normalizeTags(rawTags: unknown): string[] {
     if (Array.isArray(rawTags)) {
@@ -37,52 +52,47 @@ function normalizeTags(rawTags: unknown): string[] {
 
 const contentLoaderConfig = {
     includeSrc: true,
-    render: true,
-    excerpt: true,
-    async transform(rawData: any[]) {
-        const docPages = rawData.filter((page: any) => page.frontmatter?.layout === 'doc');
-        const data = await pMap(
-            docPages,
-            async (page: any) => {
-                const lastUpdated = await getLastUpdated(page.url);
-                const sourceFile = getSourceMarkdownPath(page.url);
-                const category = getPostCategory(sourceFile);
-                const plainText = toExcerptText(page.src).substring(0, EXCERPT_LENGTH);
-                const excerpt = `${plainText}${plainText.length >= 30 ? EXCERPT_SUFFIX : ""}`.trim();
-                const textNum = page.src.length;
+    async transform(rawData: ContentData[]): Promise<PostSummary[]> {
+        const docPages = rawData.filter((page) => page.frontmatter.layout === "doc");
+        const sortMethod = getSortMethod(theme.sortMethod);
+        const shouldCalculateLastUpdated = theme.lastUpdated.use || sortMethod === "lastUpdated";
+        const useGitTimestamps = shouldCalculateLastUpdated && docPages.length > 0
+            ? await prepareGitTimestampCache()
+            : false;
 
-                return {
-                    title: page.frontmatter.title,
-                    date: page.frontmatter.date,
-                    link: getPublicLink(page.url),
-                    excerpt: excerpt,
-                    tags: normalizeTags(page.frontmatter?.tags),
-                    category,
-                    cover: page.frontmatter.cover || '',
-                    lastUpdated,
-                    textNum,
-                }
-                // return { ...item, lastUpdated };
-            },
-            { concurrency: 64 }
-        );
-        const sortMethod: "date" | "lastUpdated" = theme.sortMethod || 'lastUpdated';
-        switch (sortMethod) {
-            case 'lastUpdated':
-                data.sort((a, b) => getSortTime(b) - getSortTime(a));
-                break;
-            case 'date':
-            default:
-                data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                break;
+        const data = await Promise.all(docPages.map(async (page): Promise<PostSummary> => {
+            const sourceFile = getSourceMarkdownPath(page.url);
+            const sourcePath = getMarkdownFilePath(sourceFile);
+            const plainText = toExcerptText(page.src ?? "").substring(0, EXCERPT_LENGTH);
+            const excerpt = `${plainText}${plainText.length >= 30 ? EXCERPT_SUFFIX : ""}`.trim();
+
+            return {
+                title: toText(page.frontmatter.title),
+                date: toPostDate(page.frontmatter.date),
+                link: getPublicLink(sourceFile),
+                excerpt,
+                tags: normalizeTags(page.frontmatter.tags),
+                category: getPostCategory(sourceFile),
+                cover: toText(page.frontmatter.cover),
+                ...(shouldCalculateLastUpdated
+                    ? { lastUpdated: await getLastUpdated(sourcePath, useGitTimestamps) }
+                    : {}),
+                textNum: page.src?.length ?? 0,
+            };
+        }));
+
+        if (sortMethod === "lastUpdated") {
+            data.sort((a, b) => getSortTime(b) - getSortTime(a));
+        } else {
+            data.sort((a, b) => getDateTimestamp(b.date) - getDateTimestamp(a.date));
         }
+
         return data;
     }
 }
-const loader = createContentLoader('posts/**/*.md', contentLoaderConfig)
+const loader = createContentLoader<PostSummary[]>('posts/**/*.md', contentLoaderConfig)
 export const data = await loader.load();
 export default loader;
-// export default createContentLoader('posts/**/*.md', contentLoaderConfig)
 
 function toExcerptText(src: string) {
     return excerptCleanupRules.reduce(
@@ -91,13 +101,13 @@ function toExcerptText(src: string) {
     );
 }
 
-function getSortTime(post: any): number {
-    return post.lastUpdated || new Date(post.date).getTime() || 0;
+function getSortTime(post: PostSummary): number {
+    return post.lastUpdated ?? getDateTimestamp(post.date);
 }
 
-function getPublicLink(url: string) {
-    const siteConfig = (globalThis as any).VITEPRESS_CONFIG;
-    const file = getSourceMarkdownPath(url).replace(/^\/+/, '');
+function getPublicLink(sourceFile: string) {
+    const siteConfig = getVitePressConfig();
+    const file = sourceFile.replace(/^\/+/, '');
     const publicFile = siteConfig.rewrites.map[file] || file;
     return '/' + publicFile
         .replace(/(^|\/)index\.md$/, '$1')
@@ -105,7 +115,7 @@ function getPublicLink(url: string) {
 }
 
 function getSourceMarkdownPath(url: string) {
-    const siteConfig = (globalThis as any).VITEPRESS_CONFIG;
+    const siteConfig = getVitePressConfig();
     const file = urlToMarkdownPath(url);
     return siteConfig.rewrites.inv[file] || file;
 }
@@ -116,28 +126,94 @@ function urlToMarkdownPath(url: string) {
         .replace(/(\.html)?$/, ".md");
 }
 
-// getLastUpdated function to fetch the last update time of a markdown file
-async function getLastUpdated(url: string) {
-    // Access global VITEPRESS_CONFIG
-    const siteConfig = (globalThis as any).VITEPRESS_CONFIG;
+async function prepareGitTimestampCache(): Promise<boolean> {
+    if (!gitTimestampCache) {
+        const postsDirectory = path.resolve(getVitePressConfig().srcDir, "posts");
+        gitTimestampCache = hasGitMetadata(postsDirectory)
+            ? cacheAllGitTimestamps(postsDirectory)
+                .then(() => true)
+                .catch(() => false)
+            : Promise.resolve(false);
+    }
 
-    let file = urlToMarkdownPath(url);
-    file = siteConfig.rewrites.inv[file] || file;
-    file = path.join(siteConfig.srcDir, file);
+    return gitTimestampCache;
+}
 
-    return new Promise((resolve, reject) => {
-        const cwd = path.dirname(file);
-        if (!fs.existsSync(cwd)) return resolve(0);
-        const fileName = path.basename(file);
-        const child = spawn("git", ["log", "-1", "--pretty=%ai", "--", fileName], {
-            cwd,
-        });
-        let output = "";
-        child.stdout.on("data", (data) => (output += String(data)));
-        child.on("close", () => {
-            const time = new Date(output.trim()).getTime();
-            resolve(Number.isFinite(time) ? time : 0);
-        });
-        child.on("error", reject);
-    });
+async function getLastUpdated(file: string, useGitTimestamps: boolean): Promise<number> {
+    if (useGitTimestamps) {
+        try {
+            const timestamp = await getGitTimestamp(toVitePressPath(file));
+            if (timestamp > 0) return timestamp;
+        } catch {
+            // A shallow or unavailable Git checkout should not prevent a static build.
+        }
+    }
+
+    return getModifiedTimestamp(file);
+}
+
+function getMarkdownFilePath(sourceFile: string): string {
+    return path.join(getVitePressConfig().srcDir, sourceFile);
+}
+
+function getModifiedTimestamp(file: string): number {
+    try {
+        return fs.statSync(file).mtimeMs;
+    } catch {
+        return 0;
+    }
+}
+
+function hasGitMetadata(startDirectory: string): boolean {
+    let directory = startDirectory;
+
+    while (true) {
+        if (fs.existsSync(path.join(directory, ".git"))) return true;
+
+        const parentDirectory = path.dirname(directory);
+        if (parentDirectory === directory) return false;
+        directory = parentDirectory;
+    }
+}
+
+function getVitePressConfig(): VitePressConfig {
+    const config = (globalThis as typeof globalThis & {
+        VITEPRESS_CONFIG?: VitePressConfig;
+    }).VITEPRESS_CONFIG;
+
+    if (!config) {
+        throw new Error("VitePress content loader requires a resolved site configuration.");
+    }
+
+    return config;
+}
+
+function getSortMethod(sortMethod: ThemeConfig["sortMethod"]): "date" | "lastUpdated" {
+    return sortMethod === "lastUpdated" ? "lastUpdated" : "date";
+}
+
+function getDateTimestamp(date: PostDate | undefined): number {
+    if (date instanceof Date) {
+        return Number.isFinite(date.getTime()) ? date.getTime() : 0;
+    }
+    if (date === undefined) return 0;
+
+    const timestamp = new Date(date).getTime();
+    return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function toPostDate(value: unknown): PostDate | undefined {
+    if (value instanceof Date || typeof value === "string" || typeof value === "number") {
+        return value;
+    }
+
+    return undefined;
+}
+
+function toText(value: unknown): string {
+    return value == null ? "" : String(value);
+}
+
+function toVitePressPath(file: string): string {
+    return file.split(path.sep).join("/");
 }

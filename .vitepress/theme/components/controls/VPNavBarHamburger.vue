@@ -9,8 +9,8 @@ defineEmits<{
 </script>
 
 <template>
-  <button type="button" class="VPNavBarHamburger" :class="{ active }" aria-label="mobile navigation"
-    :aria-expanded="active" aria-controls="VPNavScreen" @click="$emit('click')">
+  <button type="button" class="VPNavBarHamburger" :class="{ active }" :aria-label="active ? '关闭阅读工具' : '打开阅读工具'"
+    :aria-expanded="active" aria-controls="control-panel" @click="$emit('click')">
     <span class="container">
       <span class="top" />
       <span class="middle" />
@@ -24,8 +24,13 @@ defineEmits<{
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 48px;
-  height: 100%;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
 
 

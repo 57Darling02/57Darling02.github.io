@@ -1,5 +1,5 @@
 <template>
-  <div class="a-card profile-card" :class="{ 'has-border': border }" id="profile-card">
+  <div class="a-card profile-card" :class="{ 'has-border': border }">
     <div class="avatar-wrapper">
       <img :src="avatarSrc" :alt="name" class="avatar" @error="handleAvatarError" />
     </div>
@@ -21,21 +21,24 @@
           :key="index"
           :href="link.url"
           target="_blank"
+          rel="noopener noreferrer"
           class="social-item"
-          :title="link.name"
+          :aria-label="link.name"
         >
-          <i :class="link.icon"></i>
+          <ThemeIcon :name="link.icon" :src="link.iconUrl" />
         </a>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, useSlots } from 'vue'
 import { useData } from 'vitepress'
+import type ThemeConfig from '../../types/ThemeConfig'
+import ThemeIcon from '../ThemeIcon.vue'
 
-const { theme } = useData()
+const { theme } = useData<ThemeConfig>()
 const slots = useSlots()
 
 const {
@@ -49,12 +52,21 @@ const {
 
 const hasBeforeSocialSlot = computed(() => !!slots['before-social'])
 
-const normalizeAvatarSrc = (value) => typeof value === 'string' ? value.trim() : ''
+const normalizeAvatarSrc = (value: unknown) => typeof value === 'string' ? value.trim() : ''
 
-const createInlineAvatar = (displayName) => {
+const escapeXml = (value: string) => value.replace(/[<>&'\"]/g, (character) => ({
+  '<': '&lt;',
+  '>': '&gt;',
+  '&': '&amp;',
+  "'": '&apos;',
+  '"': '&quot;',
+})[character] as string)
+
+const createInlineAvatar = (displayName: string) => {
   const label = (displayName || 'U').trim().slice(0, 2).toUpperCase() || 'U'
+  const safeLabel = escapeXml(label)
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="${label}">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="${safeLabel}">
       <defs>
         <linearGradient id="avatar-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#4f46e5" />
@@ -62,7 +74,7 @@ const createInlineAvatar = (displayName) => {
         </linearGradient>
       </defs>
       <rect width="100" height="100" rx="50" fill="url(#avatar-gradient)" />
-      <text x="50" y="54" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="36" font-weight="700">${label}</text>
+      <text x="50" y="54" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="36" font-weight="700">${safeLabel}</text>
     </svg>
   `
 
@@ -72,18 +84,18 @@ const createInlineAvatar = (displayName) => {
 const inlineFallbackAvatar = computed(() => createInlineAvatar(name))
 const avatarSrc = ref(normalizeAvatarSrc(avatar) || inlineFallbackAvatar.value)
 
-const handleAvatarError = (event) => {
+const handleAvatarError = (event: Event) => {
   avatarSrc.value = inlineFallbackAvatar.value
 
-  if (event?.target) {
+  if (event.target instanceof HTMLImageElement) {
     event.target.onerror = null
     event.target.src = avatarSrc.value
   }
 }
 </script>
 
-<style lang="scss">
-#profile-card {
+<style lang="scss" scoped>
+.profile-card {
   padding: 10px 10px 10px;
 }
 
@@ -152,7 +164,12 @@ const handleAvatarError = (event) => {
   transform: scale(1.1);
 }
 
-.social-icon {
+.social-item:focus-visible {
+  outline: 2px solid var(--vp-c-brand);
+  outline-offset: 3px;
+}
+
+.social-item :deep(.theme-icon) {
   font-size: 1.1rem;
 }
 

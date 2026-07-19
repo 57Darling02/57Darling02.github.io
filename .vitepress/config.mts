@@ -1,5 +1,5 @@
 import ThemeConfig from './theme/types/ThemeConfig'
-import { defineConfig } from 'vitepress'
+import { defineConfig, type HeadConfig } from 'vitepress'
 import { createHash } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -9,9 +9,19 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { loadSiteConfig } from './theme/utils/configLoader'
 import { injectFirstPaintLoading } from './theme/utils/firstPaintLoading'
 import { createSeoConfig } from './theme/utils/seo'
+import { fontAwesomeStylesheet, hasFontAwesomeIcons } from './theme/utils/fontAwesome'
+import { createThemeIconPlugin } from './theme/utils/themeIconPlugin'
 
 const rawConfig = loadSiteConfig();
 const myconfig = rawConfig as ThemeConfig;
+const fontAwesomeHead: HeadConfig[] = hasFontAwesomeIcons(myconfig)
+  ? [['link', {
+      rel: 'stylesheet',
+      href: fontAwesomeStylesheet.href,
+      integrity: fontAwesomeStylesheet.integrity,
+      crossorigin: 'anonymous',
+    }]]
+  : []
 const rewriteTargets = new Map<string, string>();
 
 function rewritePostPath(id: string) {
@@ -57,103 +67,15 @@ function getMarkdownLayout(id: string) {
     ? String((frontmatter as Record<string, unknown>).layout || '').trim()
     : ''
 }
-
-
-const customElements = [
-  'mjx-container',
-  'mjx-assistive-mml',
-  'math',
-  'maction',
-  'maligngroup',
-  'malignmark',
-  'menclose',
-  'merror',
-  'mfenced',
-  'mfrac',
-  'mi',
-  'mlongdiv',
-  'mmultiscripts',
-  'mn',
-  'mo',
-  'mover',
-  'mpadded',
-  'mphantom',
-  'mroot',
-  'mrow',
-  'ms',
-  'mscarries',
-  'mscarry',
-  'mscarries',
-  'msgroup',
-  'mstack',
-  'mlongdiv',
-  'msline',
-  'mstack',
-  'mspace',
-  'msqrt',
-  'msrow',
-  'mstack',
-  'mstack',
-  'mstyle',
-  'msub',
-  'msup',
-  'msubsup',
-  'mtable',
-  'mtd',
-  'mtext',
-  'mtr',
-  'munder',
-  'munderover',
-  'semantics',
-  'math',
-  'mi',
-  'mn',
-  'mo',
-  'ms',
-  'mspace',
-  'mtext',
-  'menclose',
-  'merror',
-  'mfenced',
-  'mfrac',
-  'mpadded',
-  'mphantom',
-  'mroot',
-  'mrow',
-  'msqrt',
-  'mstyle',
-  'mmultiscripts',
-  'mover',
-  'mprescripts',
-  'msub',
-  'msubsup',
-  'msup',
-  'munder',
-  'munderover',
-  'none',
-  'maligngroup',
-  'malignmark',
-  'mtable',
-  'mtd',
-  'mtr',
-  'mlongdiv',
-  'mscarries',
-  'mscarry',
-  'msgroup',
-  'msline',
-  'msrow',
-  'mstack',
-  'maction',
-  'semantics',
-  'annotation',
-  'annotation-xml',
-];
 export default defineConfig<ThemeConfig>({
   ...createSeoConfig(myconfig),
   themeConfig: myconfig,
+  head: fontAwesomeHead,
   cleanUrls: true,
   ignoreDeadLinks: true,
-  lastUpdated: true,
+  // The theme data loader owns timestamp caching so it can fall back to mtime
+  // when a deployment has no Git metadata.
+  lastUpdated: false,
   rewrites: rewritePostPath,
   vite: {
     publicDir: path.resolve(process.cwd(), '.vitepress/content-public'),
@@ -161,22 +83,16 @@ export default defineConfig<ThemeConfig>({
       noExternal: ['element-plus']
     },
     plugins: [
+      createThemeIconPlugin(myconfig),
       {
         name: 'first-paint-loading-dev',
         apply: 'serve',
         transformIndexHtml: injectFirstPaintLoading,
       },
       Components({
-        resolvers: [ElementPlusResolver()],
+        resolvers: [ElementPlusResolver({ importStyle: 'css' })],
       }),
     ]
-  },
-  vue: {
-    template: {
-      compilerOptions: {
-        isCustomElement: (tag) => customElements.includes(tag),
-      }
-    }
   },
   markdown: {
     math: true,

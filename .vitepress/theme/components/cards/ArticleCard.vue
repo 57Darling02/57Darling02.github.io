@@ -1,28 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useData } from 'vitepress'
-const { theme, lang } = useData()
+import type ThemeConfig from '../../types/ThemeConfig'
+import type { PostSummary } from '../../types/PostSummary'
 import VPDocFooterLastUpdated from '../controls/VPDocFooterLastUpdated.vue'
-const props = defineProps({
-    post: {
-        type: Object,
-        default: () => ({
-            title: 'Untitled Article',
-            author: 'Anonymous',
-            date: '',
-            link: '#',
-            tags: [],
-            categories: [],
-            excerpt: '',
-            cover: '',
-            lastUpdated: '',
-            textNum: 0
-        })
-    },
-    mini: {
-        type: Boolean,
-        default: false
-    }
+import ThemeIcon from '../ThemeIcon.vue'
+const { theme, lang } = useData<ThemeConfig>()
+
+const props = withDefaults(defineProps<{
+    post: PostSummary
+    mini?: boolean
+}>(), {
+    mini: false,
 })
 const formattedDate = computed(() => {
     if (!props.post.date) return ''
@@ -38,10 +27,6 @@ const formattedDate = computed(() => {
         return 'Invalid date'
     }
 })
-
-
-
-
 </script>
 
 <template>
@@ -64,15 +49,15 @@ const formattedDate = computed(() => {
                 </p>
                 <div class="article-info" data-allow-mismatch>
                     <el-space wrap class="tag-group">
-                        <p v-if="formattedDate" class="article-meta-item"><i class="fa-solid fa-upload"></i>&nbsp;发布于&nbsp;{{
+                        <p v-if="formattedDate" class="article-meta-item"><ThemeIcon name="upload" />&nbsp;发布于&nbsp;{{
                                 formattedDate }}
                         </p>
                         <VPDocFooterLastUpdated v-if="props.post.lastUpdated" class="article-meta-item" :lastUpdated="props.post.lastUpdated" />
-                        <p class="article-meta-item"><i class="fa-solid fa-pen"></i>&nbsp;{{ props.post.textNum }}字</p>
+                        <p class="article-meta-item"><ThemeIcon name="pen-line" />&nbsp;{{ props.post.textNum }}字</p>
                         <el-tag v-for="(tag, index) in props.post.tags" :key="index" size="default" type="info"
                             effect="plain"
                             style="display: flex;justify-content: center;background-color: var(--vp-c-bg-soft);" round>
-                            <i class="fa-solid fa-hashtag"></i>{{ tag }}
+                            <ThemeIcon name="hash" />{{ tag }}
                         </el-tag>
                     </el-space>
                 </div>

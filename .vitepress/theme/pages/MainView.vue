@@ -6,66 +6,69 @@
         <content />
     </template>
     <template v-else>
-        <div style="display: flex;flex-direction: column;align-items: center;">
-            <DocView>
-                <template #doc-header>
-                    <PostInfo />
-                </template>
-                <template #main-content>
-                    <content v-show="isMounted" class="vp-doc fade-item" :class="{ 'a-card': !isFocusMode }"
-                        style="overflow-x: hidden;padding: 38px 30px 20px; --delay:0.1s" />
-                    <MarkdownImagePreview v-if="isMounted" />
-                    <el-skeleton v-if="!isMounted" class="doc-skeleton" animated :class="{ 'a-card': !isFocusMode }">
-                        <template #template>
-                            <el-skeleton-item variant="h1" class="doc-skeleton-title" />
-                            <el-skeleton-item variant="p" class="doc-skeleton-summary" />
-                            <el-skeleton-item variant="p" class="doc-skeleton-summary short" />
-                            <el-skeleton-item variant="image" class="doc-skeleton-cover" />
-                            <div class="doc-skeleton-lines">
-                                <el-skeleton-item v-for="item in 8" :key="item" variant="text" />
-                            </div>
-                        </template>
-                    </el-skeleton>
-                    <GiscusComments v-if="isMounted" class="fade-item comments-panel" :class="{ 'a-card': !isFocusMode }"
-                        style="--delay:0.1s" />
-                </template>
-                <template #sidebar-non-stay>
-                    <div class="fade-item" style="--delay:0.3s"><ProfileCard /></div>
-                </template>
-                <template #mobile-sidebar>
-                    <div class="fade-item" style="--delay:0.3s"><ProfileCard /></div>
-                </template>
-                <template #sidebar-stay>
-                    <div class="fade-item" style="--delay:0.5s">
-                        <Toc
-                            class="a-card page-toc"
-                            :style="{
-                                '--toc-max-height': isFocusMode
-                                    ? 'calc(100vh - var(--nav-height) - 40px)'
-                                    : 'min(40vh, calc(100vh - var(--nav-height) - 40px))'
-                            }"
-                        />
-                    </div>
-                </template>
-            </DocView>
-        </div>
-
+        <DocView>
+            <template #doc-header>
+                <PostInfo />
+            </template>
+            <template #main-content>
+                <content v-show="isMounted" class="vp-doc fade-item a-card"
+                    style="overflow-x: hidden;padding: 38px 30px 20px; --delay:0.1s" />
+                <MarkdownImagePreview v-if="isMounted" />
+                <el-skeleton v-if="!isMounted" class="doc-skeleton a-card" animated>
+                    <template #template>
+                        <el-skeleton-item variant="h1" class="doc-skeleton-title" />
+                        <el-skeleton-item variant="p" class="doc-skeleton-summary" />
+                        <el-skeleton-item variant="p" class="doc-skeleton-summary short" />
+                        <el-skeleton-item variant="image" class="doc-skeleton-cover" />
+                        <div class="doc-skeleton-lines">
+                            <el-skeleton-item v-for="item in 8" :key="item" variant="text" />
+                        </div>
+                    </template>
+                </el-skeleton>
+                <GiscusComments v-if="isMounted && shouldLoadGiscus" class="fade-item comments-panel a-card"
+                    style="--delay:0.1s" />
+            </template>
+            <template #sidebar-non-stay>
+                <div class="fade-item" style="--delay:0.3s"><ProfileCard /></div>
+            </template>
+            <template #mobile-sidebar>
+                <div class="fade-item" style="--delay:0.3s"><ProfileCard /></div>
+            </template>
+            <template #sidebar-stay>
+                <div v-if="showSidebar" class="fade-item" style="--delay:0.5s">
+                    <Toc class="a-card page-toc" />
+                </div>
+            </template>
+        </DocView>
     </template>
 </template>
 <script lang='ts' setup>
 import { onContentUpdated, useData } from 'vitepress'
-import { computed, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import DocView from '../layouts/DocView.vue'
 import Toc from '../components/navigation/Toc.vue'
 import ProfileCard from '../components/cards/ProfileCard.vue'
 import PostInfo from '../components/cards/PostInfo.vue'
-import GiscusComments from '../components/comments/GiscusComments.vue'
 import MarkdownImagePreview from '../components/effects/MarkdownImagePreview.vue'
+import type ThemeConfig from '../types/ThemeConfig'
 import { useLayoutState } from '../composables/useLayoutState'
-const data = useData()
+
+const GiscusComments = defineAsyncComponent(() => import('../components/comments/GiscusComments.vue'))
+const data = useData<ThemeConfig>()
+const { showSidebar } = useLayoutState()
 const frontmatter = computed(() => data.frontmatter.value)
-const { isFocusMode } = useLayoutState()
 const isMounted = ref(false)
+const shouldLoadGiscus = computed(() => {
+    const comments = data.theme.value.comments
+    return Boolean(
+        comments?.enabled &&
+        frontmatter.value.comments !== false &&
+        comments.repo &&
+        comments.repoId &&
+        comments.category &&
+        comments.categoryId,
+    )
+})
 onMounted(() => {
     isMounted.value = true
 })
@@ -77,9 +80,9 @@ onContentUpdated(() => {
 </script>
 <style lang="scss" scoped>
 .comments-panel {
-    margin-top: 12px;
     width: 100%;
     box-sizing: border-box;
+    margin-top: 12px;
     padding: 24px 30px;
 }
 
@@ -133,6 +136,7 @@ onContentUpdated(() => {
 
 .page-toc {
     --toc-padding-y: 36px;
+    --toc-max-height: min(65vh, calc(100vh - var(--nav-height) - 40px));
     padding: 18px;
 }
 </style>

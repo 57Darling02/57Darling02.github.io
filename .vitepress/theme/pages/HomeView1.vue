@@ -1,20 +1,13 @@
 <template>
-  <div style="display: flex; width: 100%; flex-direction: column; align-items: center; justify-content: center;">
+  <div class="home-view">
     <DocView>
       <template #doc-header>
-        <div ref="firstViewRef" class="firstview">
-          <div ref="topProfileRef" class="firstview-profile">
-            <ProfileCard class="no-hover-card" style="background-color: transparent;backdrop-filter:none;box-shadow: none;">
-              <template #before-social>
-                <div class="a-card" id="main-title" style="background-color: rgba(var(--vp-c-bg-rgb), 0.6);backdrop-filter: blur(8px);">
-                  <el-text truncated style="color: var(--vp-c-text);">{{ mainTitle }}</el-text>
-                  <h3 class="subtitle multipleStrings"></h3>
-                </div>
-              </template>
-            </ProfileCard>
+        <HeroSurface class="home-hero" appearance="clear">
+          <div class="firstview">
+            <h1 class="home-title">{{ mainTitle }}</h1>
+            <p ref="subtitleRef" class="home-subtitle multipleStrings" aria-live="polite"></p>
           </div>
-          <div class="scroll-hint" :style="{ opacity: scrollHintOpacity }">往下滚动</div>
-        </div>
+        </HeroSurface>
       </template>
 
       <template #main-content>
@@ -60,7 +53,7 @@
       </template>
 
       <template #sidebar-stay>
-        <ProfileCard v-show="showSidebarProfile" />
+        <ProfileCard />
         <TagFilterCard :posts="posts" v-model:selectedTags="selectedTags" />
         <FolderFilterCard :posts="posts" v-model:selectedFolder="selectedFolder" />
       </template>
@@ -68,37 +61,37 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed, watch, type ObjectDirective } from 'vue'
 import { useData } from 'vitepress'
-import TypeIt from 'typeit'
 import DocView from '../layouts/DocView.vue'
+import HeroSurface from '../components/HeroSurface.vue'
 import ProfileCard from '../components/cards/ProfileCard.vue'
 import TagFilterCard from '../components/cards/TagFilterCard.vue'
 import FolderFilterCard from '../components/cards/FolderFilterCard.vue'
 import ArticleCard from '../components/cards/ArticleCard.vue'
 import { data as posts } from '../data/posts.data.ts'
+import type ThemeConfig from '../types/ThemeConfig'
 
-const { theme } = useData()
+const { theme } = useData<ThemeConfig>()
 
-const selectedTags = ref([])
+const selectedTags = ref<string[]>([])
 const selectedFolder = ref('')
 const currentPage = ref(1)
 const pageSize = ref(theme.value.pageSize || 8)
 
-const firstViewRef = ref(null)
-const topProfileRef = ref(null)
-const showSidebarProfile = ref(false)
-const scrollHintOpacity = ref(1)
+const subtitleRef = ref<HTMLElement | null>(null)
+const isReducedMotion = ref(false)
 
 const mainTitle = ref(theme.value.home.mainTitle || 'VitePress Theme')
 const subTitles = ref(theme.value.home.subTitles || ['VitePress Theme'])
 
-let typeitInstance = null
-let topProfileObserver = null
-let scrollHintRoot = null
-let scrollHintFrame = null
-let postRevealObservers = []
+type TypeItInstance = { destroy: () => void }
+
+let typeitInstance: TypeItInstance | null = null
+let typeitLoadId = 0
+let postRevealObservers: IntersectionObserver[] = []
+let motionMediaQuery: MediaQueryList | null = null
 
 const POST_REVEAL_VISIBLE_CLASS = 'is-visible'
 
@@ -126,76 +119,62 @@ watch([selectedTags, selectedFolder], () => {
   currentPage.value = 1
 })
 
-const handleCurrentChange = (val) => {
+const handleCurrentChange = (val: number) => {
   currentPage.value = val
 }
 
-const getScrollRoot = () => document.querySelector('.el-scrollbar__wrap')
+const stopTypeIt = () => {
+  typeitLoadId += 1
+  typeitInstance?.destroy()
+  typeitInstance = null
+}
 
-const setupTopProfileObserver = () => {
-  if (typeof window === 'undefined') return
-  if (!topProfileRef.value) return
+const showStaticSubtitle = () => {
+  if (subtitleRef.value) {
+    subtitleRef.value.textContent = subTitles.value.join(' ')
+  }
+}
 
-  if (!('IntersectionObserver' in window)) {
-    showSidebarProfile.value = true
+const startTypeIt = async () => {
+  if (isReducedMotion.value || !subtitleRef.value) return
+
+  const loadId = ++typeitLoadId
+  const { default: TypeIt } = await import('typeit')
+  if (loadId !== typeitLoadId || isReducedMotion.value || !subtitleRef.value) return
+
+  subtitleRef.value.textContent = ''
+  typeitInstance = new TypeIt(subtitleRef.value, {
+    strings: subTitles.value,
+    speed: 100,
+    breakLines: false,
+    lifeLike: true,
+    loop: false,
+    cursor: {
+      autoStart: true,
+      animation: { opacity: 0 },
+    },
+  }).go()
+}
+
+const getScrollRoot = () => document.querySelector<HTMLElement>('.el-scrollbar__wrap')
+
+const updateMotionPreference = () => {
+  isReducedMotion.value = motionMediaQuery?.matches ?? false
+
+  if (isReducedMotion.value) {
+    stopTypeIt()
+    showStaticSubtitle()
     return
   }
 
-  topProfileObserver = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0]
-      showSidebarProfile.value = !entry.isIntersecting
-    },
-    {
-      root: getScrollRoot(),
-      threshold: 0,
-    }
-  )
-
-  topProfileObserver.observe(topProfileRef.value)
+  void startTypeIt()
 }
 
-const getScrollHintTop = () => {
-  if (scrollHintRoot && scrollHintRoot !== window) {
-    return scrollHintRoot.scrollTop
-  }
-
-  return window.scrollY || document.documentElement.scrollTop || 0
-}
-
-const updateScrollHintOpacity = () => {
-  scrollHintFrame = null
-  scrollHintOpacity.value = Math.max(0, 1 - getScrollHintTop() / 120)
-}
-
-const handleScrollHintScroll = () => {
-  if (scrollHintFrame !== null) return
-  scrollHintFrame = window.requestAnimationFrame(updateScrollHintOpacity)
-}
-
-const setupScrollHint = () => {
-  if (typeof window === 'undefined') return
-
-  scrollHintRoot = getScrollRoot() || window
-  updateScrollHintOpacity()
-  scrollHintRoot.addEventListener('scroll', handleScrollHintScroll, { passive: true })
-}
-
-const cleanupScrollHint = () => {
-  scrollHintRoot?.removeEventListener('scroll', handleScrollHintScroll)
-  scrollHintRoot = null
-
-  if (scrollHintFrame !== null) {
-    window.cancelAnimationFrame(scrollHintFrame)
-    scrollHintFrame = null
-  }
-}
-
-const setPostRevealVisible = (el, visible) => {
+const setPostRevealVisible = (el: Element, visible: boolean) => {
   el.classList.toggle(POST_REVEAL_VISIBLE_CLASS, visible)
 }
 
-const createPostRevealObserver = (visible, options) =>
+const createPostRevealObserver = (visible: boolean, options: IntersectionObserverInit) =>
   new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting === visible) {
@@ -224,13 +203,13 @@ const getPostRevealObservers = () => {
   return postRevealObservers
 }
 
-const observePostReveal = (el) => {
+const observePostReveal = (el: Element) => {
   getPostRevealObservers().forEach((observer) => observer.observe(el))
 }
 
-const vReveal = {
+const vReveal: ObjectDirective<HTMLElement> = {
   mounted(el) {
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+    if (isReducedMotion.value || typeof window === 'undefined' || !('IntersectionObserver' in window)) {
       setPostRevealVisible(el, true)
       return
     }
@@ -243,74 +222,58 @@ const vReveal = {
 }
 
 onMounted(() => {
-  typeitInstance = new TypeIt('.subtitle', {
-    strings: subTitles.value,
-    speed: 100,
-    breakLines: false,
-    lifeLike: true,
-    loop: false,
-    cursor: {
-      autoStart: true,
-      animation: { opacity: 0 },
-    },
-  }).go()
-
-  const firstViewHeight = theme.value?.home?.firstViewHeight || '60'
-  if (firstViewRef.value) {
-    firstViewRef.value.style.height = `${firstViewHeight}vh`
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    motionMediaQuery.addEventListener('change', updateMotionPreference)
   }
 
-  
-
-  setupTopProfileObserver()
-  setupScrollHint()
+  updateMotionPreference()
 })
 
 onUnmounted(() => {
-  typeitInstance?.destroy()
-  topProfileObserver?.disconnect()
-  topProfileObserver = null
+  motionMediaQuery?.removeEventListener('change', updateMotionPreference)
+  motionMediaQuery = null
+  stopTypeIt()
   postRevealObservers.forEach((observer) => observer.disconnect())
   postRevealObservers = []
-  cleanupScrollHint()
-  
 })
 </script>
 
 <style>
+.home-view {
+  width: 100%;
+}
+
 .firstview {
   position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-#main-title {
   width: 100%;
-  min-width: 0;
-  max-width: none;
-  display: flex;
+  min-height: var(--hero-min-height);
+  padding: 4rem 1.5rem 4.5rem;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  padding: 20px;
-  margin-bottom: 16px;
+  text-align: center;
 }
 
-.subtitle {
-  font: 1.2em sans-serif;
+.home-title {
+  max-width: min(900px, 100%);
+  margin: 0;
+  color: var(--vp-c-text);
+  font-size: 2.75rem;
+  font-weight: 600;
+  line-height: 1.28;
+  text-shadow: 0 2px 18px rgb(var(--vp-c-bg-rgb) / 0.58);
+  text-wrap: balance;
 }
 
-.firstview-profile {
-  width: min(360px, 90vw);
-  margin-top: 0;
-}
-
-.firstview-profile .no-hover-card:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
+.home-subtitle {
+  min-height: 1.5em;
+  margin: 1rem 0 0;
+  color: var(--vp-c-text-1);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  text-shadow: 0 1px 12px rgb(var(--vp-c-bg-rgb) / 0.58);
 }
 
 .post-reveal {
@@ -330,8 +293,24 @@ onUnmounted(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .post-reveal {
+    opacity: 1;
     transition: none;
     transform: none;
+  }
+}
+
+@media (max-width: 748px) {
+  .firstview {
+    padding: 2.5rem 1rem 3.75rem;
+  }
+
+  .home-title {
+    font-size: 1.85rem;
+    line-height: 1.35;
+  }
+
+  .home-subtitle {
+    font-size: 1rem;
   }
 }
 
@@ -373,43 +352,5 @@ onUnmounted(() => {
   width: 86px;
   height: 18px;
 }
-
-.scroll-hint {
-  position: absolute;
-  left: 50%;
-  bottom: 15%;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 999px;
-  background: rgba(var(--vp-c-bg-rgb), 0.78);
-  color: var(--vp-c-text-1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0;
-  white-space: nowrap;
-  animation: scroll-hint-bounce 1.6s ease-in-out infinite;
-  transition: opacity 0.12s linear;
-}
-
-@keyframes scroll-hint-bounce {
-  0%,
-  100% {
-    transform: translate(-50%, 0);
-  }
-
-  50% {
-    transform: translate(-50%, 6px);
-  }
-}
-
-
 
 </style>

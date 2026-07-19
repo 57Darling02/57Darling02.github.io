@@ -5,16 +5,15 @@
             <p class="subtitle">页面消失在数字深渊</p>
             <a href="/" class="home-btn">
                 返回安全地带
-                <div class="icon">
-                    <svg viewBox="0 0 16 16" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.354 8.354l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 11.708-.708L8 10.293l2.646-2.647a.5.5 0 01.708.708z" />
-                    </svg>
-                </div>
+                <ThemeIcon name="arrow-right" class="icon" size="1.2rem" />
             </a>
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+import ThemeIcon from '../components/ThemeIcon.vue'
+</script>
 
 <style lang="scss" scoped>
 .not-found {

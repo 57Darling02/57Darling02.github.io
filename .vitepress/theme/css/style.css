@@ -10,11 +10,16 @@
 :root {
   --sidebar-width: 300px;
   --nav-height: 48px;
+  --anchor-clearance: 8px;
   --z-fixed-control: 900;
   --z-overlay: 1000;
   /* 重构elementpluscss */
   --el-bg-color: var(--vp-c-bg);
   --vp-c-bg-rgb: 255, 255, 255;
+  --vp-c-content-ground: color-mix(in srgb, var(--vp-c-bg) 94%, var(--vp-c-brand) 6%);
+  --vp-c-content-surface: color-mix(in srgb, var(--vp-c-content-ground) 76%, var(--vp-c-bg-elv));
+  --vp-c-content-surface-border: color-mix(in srgb, var(--vp-c-divider) 64%, transparent);
+  --vp-c-content-surface-shadow: 0 10px 24px rgb(15 23 42 / 0.08);
   font-family:
     "Noto Sans SC",
     -apple-system,
@@ -48,22 +53,18 @@
 
 html:not(.dark) {
   --vp-c-bg: #f8f8f8;
-  --vp-c-bg-rgb: 250, 250, 250;
+  --vp-c-bg-rgb: 248, 248, 248;
 }
 
 .dark {
-  --vp-c-bg-rgb: 18, 18, 18;
+  --vp-c-bg-rgb: 27, 27, 31;
+  --vp-c-content-ground: color-mix(in srgb, var(--vp-c-bg) 90%, black 10%);
+  --vp-c-content-surface: color-mix(in srgb, var(--vp-c-content-ground) 50%, var(--vp-c-bg-elv));
+  --vp-c-content-surface-border: color-mix(in srgb, var(--vp-c-divider) 76%, transparent);
+  --vp-c-content-surface-shadow: 0 14px 30px rgb(0 0 0 / 0.32);
 }
 
 
-
-footer {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-top: 30px;
-}
 
 body .VPLocalSearchBox.VPLocalSearchBox {
   z-index: var(--z-overlay);
@@ -90,22 +91,21 @@ body .VPLocalSearchBox.VPLocalSearchBox {
 }
 
 .a-card {
-  background: var(--vp-c-bg);
+  background: var(--a-card-bg, var(--vp-c-content-surface));
   border-radius: 18px;
   padding: 5px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--a-card-shadow, var(--vp-c-content-surface-shadow));
   outline: none;
-  background-color: rgba(var(--vp-c-bg-rgb), 0.8);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid transparent;
+  border: 1px solid var(--a-card-border, var(--vp-c-content-surface-border));
 
 }
 
 .a-card:hover {
   transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-  transform: scale(1.01);
+  transform: translateY(-2px);
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(59, 130, 246, 0.3);
   /* 添加发光边框效果 */

@@ -6,7 +6,6 @@
 
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import 'aplayer/dist/APlayer.min.css'
 
 const props = withDefaults(
     defineProps<{
@@ -32,16 +31,38 @@ type APlayerInstance = {
     destroy: () => void
 }
 
+type APlayerConstructor = new (options: Record<string, unknown>) => APlayerInstance
+
 const containerRef = ref<HTMLElement | null>(null)
 let player: APlayerInstance | null = null
+let playerLoad: Promise<APlayerConstructor> | undefined
+let createVersion = 0
+let isUnmounted = false
+
+const loadAPlayer = () => {
+    playerLoad ??= Promise.all([
+        import('aplayer'),
+        import('aplayer/dist/APlayer.min.css'),
+    ]).then(([module]) => module.default as unknown as APlayerConstructor)
+
+    return playerLoad
+}
+
+const destroyPlayer = () => {
+    player?.destroy()
+    player = null
+}
 
 const createPlayer = async () => {
     if (typeof window === 'undefined' || !containerRef.value) return
 
-    const { default: APlayer } = await import('aplayer')
-    player?.destroy()
+    const version = ++createVersion
+    const APlayer = await loadAPlayer()
+    if (isUnmounted || version !== createVersion || !containerRef.value) return
 
-    player = new APlayer({
+    destroyPlayer()
+
+    const nextPlayer = new APlayer({
         container: containerRef.value,
         autoplay: props.autoplay,
         preload: 'metadata',
@@ -55,8 +76,14 @@ const createPlayer = async () => {
                 url: props.url,
             },
         ],
-    }) as unknown as APlayerInstance
+    })
 
+    if (isUnmounted || version !== createVersion) {
+        nextPlayer.destroy()
+        return
+    }
+
+    player = nextPlayer
     player.on('play', () => emit('playing-change', true))
     player.on('pause', () => emit('playing-change', false))
     player.on('ended', () => emit('playing-change', false))
@@ -74,8 +101,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-    player?.destroy()
-    player = null
+    isUnmounted = true
+    createVersion += 1
+    destroyPlayer()
 })
 </script>
 

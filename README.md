@@ -119,6 +119,8 @@ public/
 ```
 其中public用于非文章专属的资源。
 
+站点配置中的 `icon` 支持 [Lucide](https://lucide.nodejs.cn/icons/) 的 kebab-case 名称（例如 `compass`、`users`），也支持 Font Awesome Free 类名（例如 `fa-brands fa-github`）。只要配置中出现 `fa-*`，主题会按需引入一次 Font Awesome CDN；不会校验具体 Font Awesome 图标名。使用前请遵守 [Font Awesome Free 许可条款](https://fontawesome.com/license/free)。需要自行维护的品牌资源时，也可使用 `iconUrl` 指向知识库 `public/` 中的 SVG 或图片资源。
+
 #### 4.1 写文章
 ```md
 ---

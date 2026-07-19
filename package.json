@@ -1,14 +1,11 @@
 {
   "devDependencies": {
-    "@types/cross-spawn": "^6.0.6",
     "@types/js-yaml": "^4.0.9",
-    "element-plus": "^2.13.7",
     "markdown-it-mathjax3": "^4.3.2",
     "sass": "^1.89.0",
-    "unplugin-auto-import": "^0.17.4",
     "unplugin-vue-components": "^0.27.0",
-    "vitepress": "2.0.0-alpha.17",
-    "vue": "^3.5.13"
+    "vitepress": "2.0.0-alpha.18",
+    "vue": "^3.5.40"
   },
   "scripts": {
     "prepare-content": "node scripts/prepare-content.js",
@@ -19,11 +16,10 @@
   },
   "dependencies": {
     "@giscus/vue": "^3.1.1",
+    "@lucide/vue": "^1.25.0",
     "aplayer": "^1.10.1",
-    "cross-spawn": "^7.0.6",
     "element-plus": "^2.13.7",
     "js-yaml": "^4.1.1",
-    "p-map": "^7.0.3",
     "typeit": "^8.8.7"
   },
   "type": "module"

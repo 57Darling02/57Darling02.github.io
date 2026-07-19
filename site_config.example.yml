@@ -24,7 +24,6 @@ home:
     - "写 Markdown"
     - "推送文章"
     - "自动上线"
-  firstViewHeight: 100
 
 # Post list
 # sortMethod: "date" or "lastUpdated".
@@ -42,19 +41,24 @@ position: "NPC"
 bio: "红红火火恍恍惚惚"
 socialLinks:
   - name: "GitHub"
+    # icon supports Lucide kebab-case names and Font Awesome fa-* classes.
+    # Font Awesome CSS is loaded only when a fa-* icon is configured.
     icon: "fa-brands fa-github"
+    # Replace icon with iconUrl for a local brand SVG, for example:
+    # iconUrl: "/image/github.svg"
     url: "https://github.com/57Darling02/"
 
 # Navbar menu
 # link uses site paths such as "/FriendLink/" or external URLs such as "https://example.com".
 menuItems:
-  - label: "更多"
-    icon: "fa-solid fa-compass"
+  - key: more
+    label: 更多
+    icon: "compass"
     children:
-      - key: "friends"
-        label: "友链"
-        icon: "fa-solid fa-user-group"
-        link: "/FriendLink/"
+      - key: friends
+        label: 友链
+        icon: users
+        link: /FriendLink/
 
 # Navigation music player
 # volume range: 0 ~ 1.

@@ -1,56 +1,50 @@
 <template>
-
-    <div class="doc-header" style="width: 100%;">
-        <slot name="doc-header"/>
+  <div class="document-view">
+    <div class="doc-header">
+      <slot name="doc-header" />
     </div>
 
-    <div id="content-container" :style="{ maxWidth: isFocusMode && (!frontmatter.layout || frontmatter.layout === 'doc') ? 'none' : '1380px' }">
-
-        <!-- 主内容 -->
+    <div class="content-ground">
+      <div id="content-container">
         <div id="page-wrapper">
-            <slot name="main-content" />
-            <div class="mobile-sidebar" v-if="isMobile">
-                <slot name="mobile-sidebar">
-                    <template v-if="!isFocusMode">
-                        <slot name="sidebar-non-stay"/>
-                        <slot name="sidebar-stay"/>
-                    </template>
-                    <template v-else>
-                        <slot name="sidebar-stay"/>
-                    </template>
-                </slot>
-            </div>
+          <slot name="main-content" />
+          <div v-if="isMobile" class="mobile-sidebar">
+            <slot name="mobile-sidebar">
+              <slot name="sidebar-non-stay" />
+              <slot name="sidebar-stay" />
+            </slot>
+          </div>
         </div>
 
-        <!-- 侧边栏 -->
-        <div class="sidebar" v-if="showSidebar">
-            <!-- 正常模式 -->
-            <template v-if="!isFocusMode">
-                <slot name="sidebar-non-stay"/>
-                <div class="sidebar-stay" :class="{ 'nav-hidden': !showNavbar }">
-                    
-                    <slot name="sidebar-stay"/>
-                </div>
-            </template>
-            <!-- 专注模式 -->
-            <template v-else>
-                <div class="sidebar-stay"
-                    :class="{ 'nav-hidden': !showNavbar }">
-                    <slot name="sidebar-stay"/>
-                </div>
-            </template>
-        </div>
+        <aside v-if="!isMobile" v-show="showSidebar" id="site-sidebar" class="sidebar">
+          <slot name="sidebar-non-stay" />
+          <div class="sidebar-stay" :class="{ 'nav-hidden': !showNavbar }">
+            <slot name="sidebar-stay" />
+          </div>
+        </aside>
+      </div>
     </div>
+  </div>
 </template>
 <script lang='ts' setup>
-import { useData } from 'vitepress'
 import { useLayoutState } from '../composables/useLayoutState'
 
-const { frontmatter } = useData()
-const { isFocusMode, showNavbar, showSidebar, isMobile } = useLayoutState()
+const { showNavbar, showSidebar, isMobile } = useLayoutState()
 </script>
 <style lang="scss" scoped>
-$hide-offset: var(--nav-height);
+.document-view {
+    width: 100%;
+    margin-top: calc(-1 * var(--nav-height));
+}
+
+.doc-header {
+    width: 100%;
+}
+
+.content-ground {
+    width: 100%;
+    background: var(--vp-c-content-ground);
+}
 
 #content-container {
     display: flex;
@@ -60,6 +54,7 @@ $hide-offset: var(--nav-height);
     min-width: 0;
     position: relative;
     width: 100%;
+    max-width: 1380px;
 }
 
 #page-wrapper {
@@ -106,7 +101,7 @@ $hide-offset: var(--nav-height);
     display: flex;
     flex-direction: column;
     &.nav-hidden {
-        top: 0px;
+        top: 10px;
         max-height: 100vh;
     }
 }
