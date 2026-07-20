@@ -38,7 +38,9 @@
           <use class="hero-surface-wave-layer wave-far" :href="`#${waveId}`" x="48" y="0" />
           <use class="hero-surface-wave-layer wave-back" :href="`#${waveId}`" x="48" y="3" />
           <use class="hero-surface-wave-layer wave-middle" :href="`#${waveId}`" x="48" y="5" />
-          <use class="hero-surface-wave-layer wave-front" :href="`#${waveId}`" x="48" y="7" />
+          <g class="hero-surface-wave-front-scale">
+            <use class="hero-surface-wave-layer wave-front" :href="`#${waveId}`" x="48" y="7" />
+          </g>
         </g>
       </svg>
     </div>
@@ -220,6 +222,8 @@ watch(themeBackground, () => {
 }
 
 .hero-surface-waves {
+  --front-wave-scale-x: 1.8;
+
   position: absolute;
   z-index: 2;
   bottom: -0.6875rem;
@@ -231,6 +235,12 @@ watch(themeBackground, () => {
 .hero-surface-wave-layer {
   transform-box: fill-box;
   will-change: transform;
+}
+
+.hero-surface-wave-front-scale {
+  transform-box: view-box;
+  transform-origin: center;
+  transform: scaleX(var(--front-wave-scale-x));
 }
 
 .wave-far {
@@ -253,7 +263,7 @@ watch(themeBackground, () => {
 
 .wave-front {
   fill: var(--hero-ground);
-  animation: hero-wave-flow 10s cubic-bezier(0.55, 0.5, 0.45, 0.5) -5s infinite;
+  animation: hero-wave-flow 9s cubic-bezier(0.55, 0.5, 0.45, 0.5) -5s infinite;
 }
 
 :global(.dark) .hero-surface {

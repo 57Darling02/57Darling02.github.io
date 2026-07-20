@@ -77,6 +77,7 @@ import {
     getHashId,
     normalizeHash,
 } from '../utils/anchor'
+import { isArticleLayout, isFramedLayout } from '../utils/pageLayout'
 
 const {
     showNavbar,
@@ -87,8 +88,9 @@ const {
     startMobileListener,
 } = useLayoutState()
 
-const isDocLayout = computed(() => frontmatter.value.layout === 'doc' || frontmatter.value.layout === undefined)
-const showFloatingToc = computed(() => isDocLayout.value && !showSidebar.value)
+const isArticlePage = computed(() => isArticleLayout(frontmatter.value.layout))
+const isFramedPage = computed(() => isFramedLayout(frontmatter.value.layout))
+const showFloatingToc = computed(() => isArticlePage.value && !showSidebar.value)
 
 // 获取全局控件
 const isMounted = ref(false)
@@ -153,7 +155,7 @@ const handleScroll = throttle(({ scrollTop }: { scrollTop: number }) => {
     const windowHeight = scrollbarRef.value?.wrapRef?.clientHeight || 0
     scrollingDown.value = currentY > lastScrollY.value
 
-    if (typeof window !== 'undefined' && currentY < 150 && isDocLayout.value) {
+    if (typeof window !== 'undefined' && currentY < 150 && isFramedPage.value) {
         setNavbarVisible(true)
     } else if (scrollingDown.value) {
         setNavbarVisible(false)

@@ -1,13 +1,17 @@
 <template>
     <div
-        id="nav"
-        ref="navRef"
-        :class="{ 'nav-compact': isCompact, 'nav-hidden': navPhase === 'hidden' }"
-        :aria-hidden="!isNavInteractive ? 'true' : undefined"
+        id="nav-reveal-zone"
+        :class="{ 'nav-reveal-zone-hidden': navPhase === 'hidden' }"
         @mouseenter="handleNavMouseEnter"
         @mouseleave="handleNavMouseLeave"
     >
-        <div id="menu" :inert="!isNavInteractive || undefined">
+        <div
+            id="nav"
+            ref="navRef"
+            :class="{ 'nav-compact': isCompact, 'nav-hidden': navPhase === 'hidden' }"
+            :aria-hidden="!isNavInteractive ? 'true' : undefined"
+        >
+            <div id="menu" :inert="!isNavInteractive || undefined">
             <a class="menu-fitem" href="/" aria-label="首页" @click="handleLinkClick('/', $event)">
                 <span class="menu-fitem-content">
                     <ThemeIcon name="house" />
@@ -62,7 +66,8 @@
                 </a>
             </template>
 
-            <VPNavBarSearch class="menu-fitem menu-fitem-search" />
+                <VPNavBarSearch class="menu-fitem menu-fitem-search" />
+            </div>
         </div>
     </div>
 
@@ -504,14 +509,37 @@ onBeforeUnmount(() => {
 $nav-height: var(--nav-height);
 $border-radius: 50px;
 $nav-gap: 4px;
+$nav-reveal-peek: 8px;
+
+#nav-reveal-zone {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: var(--z-fixed-control);
+    display: flex;
+    align-items: flex-start;
+    width: max-content;
+    max-width: 100vw;
+    height: $nav-height;
+    transform: translateX(-50%);
+
+    &.nav-reveal-zone-hidden {
+        height: $nav-gap;
+    }
+
+    @media (min-width: 749px) {
+        &.nav-reveal-zone-hidden {
+            height: $nav-reveal-peek;
+        }
+    }
+}
 
 #nav {
     height: calc(#{$nav-height} - #{$nav-gap} * 2);
-    position: fixed;
+    position: relative;
     top: $nav-gap;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: var(--z-fixed-control);
+    transform: translateY(0);
+    z-index: 1;
     opacity: 0.9;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
@@ -525,21 +553,23 @@ $nav-gap: 4px;
     transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
 
     &.nav-hidden {
-        transform: translate(-50%, calc(-100% - #{$nav-gap}));
+        transform: translateY(calc(-100% - #{$nav-gap}));
         transition-duration: 260ms;
         transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
     }
 
     @media (min-width: 749px) {
         &.nav-hidden {
-            transform: translate(-50%, -100%);
+            transform: translateY(calc(-100% - #{$nav-gap} + #{$nav-reveal-peek}));
         }
+    }
+}
 
-        &.nav-hidden:hover {
-            transform: translateX(-50%);
-            transition-duration: 180ms;
-            transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-        }
+@media (min-width: 749px) {
+    #nav-reveal-zone.nav-reveal-zone-hidden:hover #nav.nav-hidden {
+        transform: translateY(0);
+        transition-duration: 180ms;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     }
 }
 

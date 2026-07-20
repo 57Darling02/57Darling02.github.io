@@ -139,7 +139,7 @@ layout: doc
 封面可直接引用文章仓库中的相对图片，例如 `cover: ./cover.webp` 或 `cover: ../附件/image.png`。相对路径与 Markdown 图片一样以当前文章为基准，构建时会自动生成带 hash 的静态资源；以 `/` 开头的路径仍指向 `public/`，`https://` 外链也保持可用。
 
 #### 4.2 写页面
-如果希望展示自己的页面，本文也提供VUE完成自己的页面
+如果希望展示自己的页面，本文也提供 VUE 完成自己的页面。`layout: page` 会复用主题的普通页面框架：首屏信息区、正文容器和首页相同的个人资料侧栏；它不会附带文章日期、目录或评论。
 例如[友链页面](https://vitepress.57d02.cn/FriendLink/)的效果
 在知识库中的配置见[模板仓库的FriendLink文件夹](https://github.com/57Darling02/wiki_template/tree/main/FriendLink)
 
@@ -156,9 +156,8 @@ layout: page
 <script setup>
 import FriendLinkPage from './FriendLinkPage.vue'
 </script>
-<ClientOnly>
-  <FriendLinkPage />
-</ClientOnly>
+
+<FriendLinkPage />
 ```
 
 然后在 `site_config.yml` 的 `menuItems` 中手动配置,告知访客入口即可。
