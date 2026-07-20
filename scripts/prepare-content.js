@@ -16,6 +16,7 @@ const tempCloneDir = path.join(rootDir, '.vitepress', 'content-source');
 const envLocalPath = path.join(rootDir, '.env.local');
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
 const LOG_PREFIX = '[prepare-content]';
+const CONTENT_BRANCH = 'main';
 
 main();
 
@@ -24,18 +25,17 @@ function main() {
     loadEnvLocal();
 
     const wikiUrl = readEnv('WIKI_URL');
-    const wikiBranch = readEnv('WIKI_BRANCH') || 'main';
     const pat = readEnv('PAT');
 
     ensureDirectory(postsDir);
 
     if (wikiUrl) {
-      replacePostsFromRemote(wikiUrl, wikiBranch, pat);
+      replacePostsFromRemote(wikiUrl, pat);
       const result = sanitizeRemoteMarkdownPosts(postsDir);
       printSanitizeResult(result);
     } else {
       if (process.env.CI === 'true') {
-        throw new Error('WIKI_URL is required in CI. Run Setup Blog or configure WIKI_URL/WIKI_BRANCH/PAT repository secrets.');
+        throw new Error('WIKI_URL is required in CI. Run Setup Blog or configure WIKI_URL/PAT repository secrets.');
       }
       console.log(`${LOG_PREFIX} WIKI_URL is not configured. Using local posts/ for local development only.`);
     }
@@ -80,17 +80,17 @@ function readEnv(key) {
   return process.env[key]?.trim() || '';
 }
 
-function replacePostsFromRemote(wikiUrl, wikiBranch, pat) {
+function replacePostsFromRemote(wikiUrl, pat) {
   const safeUrl = maskSecretInUrl(wikiUrl);
   console.log(`${LOG_PREFIX} WIKI_URL configured. Remote content is the source of truth.`);
-  console.log(`${LOG_PREFIX} Cloning ${safeUrl} (${wikiBranch})`);
+  console.log(`${LOG_PREFIX} Cloning ${safeUrl} (${CONTENT_BRANCH})`);
 
   removeDirectory(tempCloneDir);
 
   const cloneArgs = [
     'clone',
     '--branch',
-    wikiBranch,
+    CONTENT_BRANCH,
     buildAuthenticatedUrl(wikiUrl, pat),
     tempCloneDir,
   ];

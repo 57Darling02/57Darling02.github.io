@@ -226,7 +226,7 @@ watch(themeBackground, () => {
 
   position: absolute;
   z-index: 2;
-  bottom: -0.6875rem;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 3.75rem;

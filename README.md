@@ -80,13 +80,14 @@ Actions -> Setup Blog -> Run workflow
 填写：
 
 - `wiki_repo_name`：你的知识库仓库名，例如 `my-blog-wiki`
-- `wiki_branch`：默认 `main`
+
+知识库分支固定为 `main`，无需配置。
 
 运行后，它会自动：
 
 - 使用 [57Darling02/wiki_template](https://github.com/57Darling02/wiki_template) 创建你的知识库仓库
 - 知识库仓库固定创建为私密仓库
-- 给主题仓库配置 `WIKI_URL`、`WIKI_BRANCH`、`PAT`
+- 给主题仓库配置 `WIKI_URL`、`PAT`
 - 给知识库仓库配置 `BLOG_REPO` 和 `PAT`
 - 尝试把 GitHub Pages 设置为 `GitHub Actions`
 - 创建知识库后，由知识库工作流通知主题仓库触发第一次部署
@@ -213,7 +214,7 @@ git fetch upstream && git checkout main && git reset --hard upstream/main && git
 
 ## 备用：手动配置（可跳过）
 
-如果自动初始化失败，可以手动用 [57Darling02/wiki_template](https://github.com/57Darling02/wiki_template) 创建私密知识库，然后在主题仓库配置 `WIKI_URL`、`WIKI_BRANCH`、`PAT` 三个 Actions secrets。
+如果自动初始化失败，可以手动用 [57Darling02/wiki_template](https://github.com/57Darling02/wiki_template) 创建私密知识库，然后在主题仓库配置 `WIKI_URL`、`PAT` 两个 Actions secrets。知识库固定使用 `main` 分支。
 
 知识库自动触发主题仓库重建需要在知识库里配置 `BLOG_REPO` 和 `PAT`，并添加 `repository_dispatch` workflow。正常用户优先使用 `Setup Blog`，不需要手动做这些。
 
@@ -245,7 +246,6 @@ pnpm docs:build
 
 ```text
 WIKI_URL=https://github.com/yourname/your-private-wiki.git
-WIKI_BRANCH=main
 PAT=ghp_xxx
 ```
 

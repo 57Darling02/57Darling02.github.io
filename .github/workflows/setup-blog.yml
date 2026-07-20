@@ -7,10 +7,6 @@ on:
         description: "New content repository name"
         required: true
         default: "my-blog-wiki"
-      wiki_branch:
-        description: "Content repository branch"
-        required: true
-        default: "main"
       configure_pages:
         description: "Try to configure GitHub Pages to use Actions"
         type: boolean
@@ -45,7 +41,6 @@ jobs:
           BLOG_REPO: ${{ github.repository }}
           WIKI_TEMPLATE: "57Darling02/wiki_template"
           WIKI_REPO_NAME: ${{ inputs.wiki_repo_name }}
-          WIKI_BRANCH: ${{ inputs.wiki_branch }}
         run: |
           set -euo pipefail
 
@@ -99,12 +94,10 @@ jobs:
           BLOG_REPO: ${{ steps.setup.outputs.blog_repo }}
           WIKI_REPO: ${{ steps.setup.outputs.wiki_repo }}
           WIKI_URL: ${{ steps.setup.outputs.wiki_url }}
-          WIKI_BRANCH: ${{ inputs.wiki_branch }}
         run: |
           set -euo pipefail
 
           printf "%s" "$WIKI_URL" | gh secret set WIKI_URL -R "$BLOG_REPO"
-          printf "%s" "$WIKI_BRANCH" | gh secret set WIKI_BRANCH -R "$BLOG_REPO"
           printf "%s" "$SETUP_PAT" | gh secret set PAT -R "$BLOG_REPO"
 
           printf "%s" "$BLOG_REPO" | gh secret set BLOG_REPO -R "$WIKI_REPO"

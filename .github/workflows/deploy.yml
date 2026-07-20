@@ -46,7 +46,6 @@ jobs:
       - name: Build with VitePress
         env:
           WIKI_URL: ${{ secrets.WIKI_URL }}
-          WIKI_BRANCH: ${{ secrets.WIKI_BRANCH }}
           PAT: ${{ secrets.PAT }}
         run: pnpm docs:build
 
