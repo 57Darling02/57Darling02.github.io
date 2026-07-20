@@ -6,6 +6,7 @@ const VIRTUAL_MODULE_ID = 'virtual:theme-icons'
 const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`
 
 const builtInIconNames = [
+  'activity',
   'arrow-right',
   'book',
   'book-open',
@@ -31,6 +32,7 @@ const builtInIconNames = [
   'pen-line',
   'search',
   'sun',
+  'sun-moon',
   'tags',
   'upload',
   'user',

@@ -9,7 +9,6 @@ const defaultSiteConfig = {
   site_url: '/',
   lang: 'zh-CN',
   author: '',
-  isDark: null,
   background: '',
   bg_rainfall: false,
   home: {

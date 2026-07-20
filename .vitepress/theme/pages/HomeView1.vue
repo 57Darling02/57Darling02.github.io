@@ -56,6 +56,7 @@
         <ProfileCard />
         <TagFilterCard :posts="posts" v-model:selectedTags="selectedTags" />
         <FolderFilterCard :posts="posts" v-model:selectedFolder="selectedFolder" />
+        <SiteStatsCard class="home-site-stats" />
       </template>
     </DocView>
   </div>
@@ -67,6 +68,7 @@ import { useData } from 'vitepress'
 import DocView from '../layouts/DocView.vue'
 import HeroSurface from '../components/HeroSurface.vue'
 import ProfileCard from '../components/cards/ProfileCard.vue'
+import SiteStatsCard from '../components/cards/SiteStatsCard.vue'
 import TagFilterCard from '../components/cards/TagFilterCard.vue'
 import FolderFilterCard from '../components/cards/FolderFilterCard.vue'
 import ArticleCard from '../components/cards/ArticleCard.vue'
@@ -242,6 +244,10 @@ onUnmounted(() => {
 <style>
 .home-view {
   width: 100%;
+}
+
+.home-site-stats {
+  margin-top: 15px;
 }
 
 .firstview {

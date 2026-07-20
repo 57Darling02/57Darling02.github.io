@@ -171,7 +171,7 @@ const handleAvatarError = (event: Event) => {
   color: var(--vp-c-text-1);
   font-size: 1.25rem;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

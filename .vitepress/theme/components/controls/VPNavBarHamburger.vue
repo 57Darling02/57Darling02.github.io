@@ -32,12 +32,9 @@ defineEmits<{
   color: inherit;
   cursor: pointer;
 }
-
-
-
 .container {
   position: relative;
-  width: 16px;
+  width: var(--control-icon-size, 18px);
   height: 14px;
   overflow: hidden;
 }
@@ -45,7 +42,7 @@ defineEmits<{
 .VPNavBarHamburger:hover .top {
   top: 0;
   left: 0;
-  transform: translateX(4px);
+  transform: translateX(25%);
 }
 
 .VPNavBarHamburger:hover .middle {
@@ -57,7 +54,7 @@ defineEmits<{
 .VPNavBarHamburger:hover .bottom {
   top: 12px;
   left: 0;
-  transform: translateX(8px);
+  transform: translateX(50%);
 }
 
 .VPNavBarHamburger.active .top {
@@ -67,7 +64,7 @@ defineEmits<{
 
 .VPNavBarHamburger.active .middle {
   top: 6px;
-  transform: translateX(16px);
+  transform: translateX(100%);
 }
 
 .VPNavBarHamburger.active .bottom {
@@ -86,7 +83,7 @@ defineEmits<{
 .middle,
 .bottom {
   position: absolute;
-  width: 16px;
+  width: 100%;
   height: 2px;
   background-color: var(--vp-c-text-1);
   transition: top .25s, background-color .5s, transform .25s;
@@ -101,12 +98,12 @@ defineEmits<{
 .middle {
   top: 6px;
   left: 0;
-  transform: translateX(8px);
+  transform: translateX(50%);
 }
 
 .bottom {
   top: 12px;
   left: 0;
-  transform: translateX(4px);
+  transform: translateX(25%);
 }
 </style>

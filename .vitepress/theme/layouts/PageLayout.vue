@@ -12,7 +12,8 @@
     </template>
 
     <template #sidebar-stay>
-      <div class="fade-item profile-sidebar"><ProfileCard /></div>
+      <ProfileCard class="fade-item profile-sidebar" />
+      <SiteStatsCard class="fade-item stats-sidebar" />
     </template>
   </DocView>
 </template>
@@ -20,6 +21,7 @@
 <script lang="ts" setup>
 import PageInfo from '../components/cards/PageInfo.vue'
 import ProfileCard from '../components/cards/ProfileCard.vue'
+import SiteStatsCard from '../components/cards/SiteStatsCard.vue'
 import MarkdownImagePreview from '../components/effects/MarkdownImagePreview.vue'
 import DocView from './DocView.vue'
 </script>
@@ -33,6 +35,11 @@ import DocView from './DocView.vue'
 
 .profile-sidebar {
   --delay: 0.3s;
+}
+
+.stats-sidebar {
+  margin-top: 10px;
+  --delay: 0.5s;
 }
 
 @media (max-width: 748px) {

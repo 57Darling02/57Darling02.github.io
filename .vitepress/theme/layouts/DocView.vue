@@ -18,7 +18,7 @@
 
         <aside v-if="!isMobile" v-show="showSidebar" id="site-sidebar" class="sidebar">
           <slot name="sidebar-non-stay" />
-          <div class="sidebar-stay" :class="{ 'nav-hidden': !showNavbar }">
+          <div class="sidebar-stay">
             <slot name="sidebar-stay" />
           </div>
         </aside>
@@ -29,7 +29,7 @@
 <script lang='ts' setup>
 import { useLayoutState } from '../composables/useLayoutState'
 
-const { showNavbar, showSidebar, isMobile } = useLayoutState()
+const { showSidebar, isMobile } = useLayoutState()
 </script>
 <style lang="scss" scoped>
 .document-view {
@@ -91,18 +91,10 @@ const { showNavbar, showSidebar, isMobile } = useLayoutState()
 .sidebar-stay {
     position: sticky;
     top: var(--nav-height);
+    min-width: 0;
     max-height: calc(100vh - (var(--nav-height)));
-    /* 保留滚动缓冲空间 */
-    transition:
-        top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.3s ease;
-    will-change: top;
     z-index: 50;
     display: flex;
     flex-direction: column;
-    &.nav-hidden {
-        top: 10px;
-        max-height: 100vh;
-    }
 }
 </style>

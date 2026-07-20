@@ -5,7 +5,6 @@ export default interface ThemeConfig {
   site_url: string;
   lang?: string;
   author: string;
-  isDark: boolean | null;
   // 首页配置
   home: HomeConfig;
   background: string;
@@ -30,8 +29,6 @@ export default interface ThemeConfig {
   comments?: CommentsConfig;
   friendlink?: FriendLink[];
   outline?: Outline;
-  lightModeSwitchTitle?: string;
-  darkModeSwitchTitle?: string;
 }
 
 

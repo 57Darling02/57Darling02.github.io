@@ -708,10 +708,11 @@ $nav-transform-duration: 240ms;
 
     .menu-fitem-search {
         align-self: center;
-        flex: 0 1 clamp(8.5rem, 13vw, 12.5rem);
+        flex: 0 1 auto;
+        inline-size: clamp(8.5rem, 13vw, 12.5rem);
         min-inline-size: 0;
         padding: 0;
-        transition: flex-basis $nav-collapse-duration cubic-bezier(0.16, 1, 0.3, 1);
+        transition: inline-size $nav-collapse-duration cubic-bezier(0.16, 1, 0.3, 1);
 
         :deep(.VPNavBarSearchButton) {
             box-sizing: border-box;
@@ -793,7 +794,7 @@ $nav-transform-duration: 240ms;
     }
 
     #menu .menu-fitem-search {
-        flex: 0 0 var(--nav-search-compact-size);
+        inline-size: var(--nav-search-compact-size);
 
         :deep(.VPNavBarSearchButton) {
             justify-content: center;
@@ -874,22 +875,24 @@ $nav-transform-duration: 240ms;
         gap: 0;
     }
 
-    #nav.nav-compact #menu .menu-fitem-search :deep(.VPNavBarSearchButton .text) {
+    #nav #menu .menu-fitem-search :deep(.VPNavBarSearchButton) {
+        position: relative;
+    }
+
+    #nav #menu .menu-fitem-search :deep(.VPNavBarSearchButton .text) {
         display: block;
-        max-inline-size: 0;
+        position: absolute;
+        inset-inline: 36px 10px;
+    }
+
+    #nav.nav-compact #menu .menu-fitem-search :deep(.VPNavBarSearchButton .text) {
         opacity: 0;
-        transition:
-            max-inline-size 100ms cubic-bezier(0.4, 0, 1, 1),
-            opacity 80ms ease-in;
+        transition: opacity 80ms ease-in;
     }
 
     #nav:not(.nav-compact) #menu .menu-fitem-search :deep(.VPNavBarSearchButton .text) {
-        display: block;
-        max-inline-size: 10em;
         opacity: 1;
-        transition:
-            max-inline-size 120ms cubic-bezier(0.16, 1, 0.3, 1) 80ms,
-            opacity 120ms ease-out 120ms;
+        transition: opacity 120ms ease-out 120ms;
     }
 
     #nav #menu .menu-label {

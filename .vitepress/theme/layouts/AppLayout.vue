@@ -44,7 +44,9 @@
                         </button>
                     </div>
                     <div class="control-item">
-                        <VPSwitchAppearance />
+                        <ClientOnly>
+                            <VPSwitchAppearance />
+                        </ClientOnly>
                     </div>
                 </div>
             </transition>
@@ -59,7 +61,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, watch } f
 import { ElMessage } from 'element-plus'
 import { useData, onContentUpdated } from 'vitepress'
 import type ThemeConfig from '../types/ThemeConfig'
-const { theme, page, frontmatter, isDark } = useData<ThemeConfig>()
+const { theme, page, frontmatter } = useData<ThemeConfig>()
 import Nav from '../components/navigation/Nav.vue'
 import Footer from '../components/navigation/Footer.vue'
 import MainView from '../pages/MainView.vue'
@@ -99,9 +101,6 @@ type ScrollbarRef = {
 
 const scrollbarRef = ref<ScrollbarRef>()
 const contentContainer = ref<HTMLElement | null>(null)
-if (typeof theme.value.isDark === 'boolean') {
-    isDark.value = theme.value.isDark
-}
 let firstPaintFrame: number | undefined
 const isControlPanelOpen = ref(false)
 const isFloatingTocOpen = computed(() => showFloatingToc.value && isControlPanelOpen.value)
@@ -369,6 +368,8 @@ onBeforeUnmount(() => {
 }
 
 #control {
+    --control-icon-size: 18px;
+
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -404,10 +405,15 @@ onBeforeUnmount(() => {
         transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
     }
 
+    .control-button,
+    .control-item button {
+        font: inherit;
+        font-size: var(--control-icon-size);
+    }
+
     .control-button {
         border: 0;
         cursor: pointer;
-        font: inherit;
     }
 
     .control-item > button {

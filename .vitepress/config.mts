@@ -118,6 +118,7 @@ export default defineConfig<ThemeConfig>({
   ...createSeoConfig(myconfig),
   themeConfig: myconfig,
   head: fontAwesomeHead,
+  appearance: true,
   cleanUrls: true,
   ignoreDeadLinks: true,
   // The theme data loader owns timestamp caching so it can fall back to mtime

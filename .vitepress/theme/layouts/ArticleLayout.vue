@@ -27,15 +27,20 @@
     </template>
 
     <template #sidebar-non-stay>
-      <div class="fade-item profile-sidebar"><ProfileCard /></div>
+      <ProfileCard class="fade-item profile-sidebar" />
     </template>
     <template #mobile-sidebar>
-      <div class="fade-item profile-sidebar"><ProfileCard /></div>
+      <ProfileCard class="fade-item profile-sidebar" />
+      <SiteStatsCard class="fade-item stats-sidebar" />
     </template>
     <template #sidebar-stay>
-      <div v-if="showSidebar" class="fade-item toc-sidebar">
-        <Toc class="a-card page-toc" />
-      </div>
+      <template v-if="showSidebar">
+        <Toc class="fade-item a-card page-toc toc-sidebar">
+          <template #empty>
+            <SiteStatsCard class="fade-item stats-sidebar" />
+          </template>
+        </Toc>
+      </template>
     </template>
   </DocView>
 </template>
@@ -46,6 +51,7 @@ import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import MarkdownImagePreview from '../components/effects/MarkdownImagePreview.vue'
 import PostInfo from '../components/cards/PostInfo.vue'
 import ProfileCard from '../components/cards/ProfileCard.vue'
+import SiteStatsCard from '../components/cards/SiteStatsCard.vue'
 import Toc from '../components/navigation/Toc.vue'
 import { useLayoutState } from '../composables/useLayoutState'
 import type ThemeConfig from '../types/ThemeConfig'
@@ -97,7 +103,13 @@ onContentUpdated(() => {
 }
 
 .toc-sidebar {
+  width: 100%;
+  min-width: 0;
   --delay: 0.5s;
+}
+
+.stats-sidebar {
+  --delay: 0.6s;
 }
 
 .doc-skeleton {

@@ -11,9 +11,7 @@ lang: "zh-CN"
 author: "57Darling02"
 
 # Visual experience
-# isDark: null follows system, true forces dark, false forces light.
 # Leave background empty for the built-in adaptive gradient, or use a HEX color or public asset path.
-isDark: null
 background: ""
 bg_rainfall: false
 

@@ -15,6 +15,8 @@ import type { Outline, OutlineLevel } from '../../types/ThemeConfig'
 import { anchorNavigatorKey, getAnchorScrollOffset, normalizeHash } from '../../utils/anchor'
 import ThemeIcon from '../ThemeIcon.vue'
 
+defineOptions({ inheritAttrs: false })
+
 const { frontmatter, theme } = useData<ThemeConfig>()
 const navigateToHash = inject(anchorNavigatorKey)
 
@@ -448,7 +450,8 @@ onBeforeUnmount(() => {
 
 <template>
   <nav
-    v-show="!isReady || headers.length > 0"
+    v-if="!isReady || headers.length"
+    v-bind="$attrs"
     class="toc"
     :class="{ 'has-active-range': visualAnchors.length > 0 }"
     aria-labelledby="toc-title"
@@ -502,6 +505,7 @@ onBeforeUnmount(() => {
     </el-scrollbar>
     <el-skeleton v-else-if="!isReady" class="toc-skeleton" :rows="6" animated />
   </nav>
+  <slot v-else name="empty" />
 </template>
 
 <style lang="scss" scoped>
