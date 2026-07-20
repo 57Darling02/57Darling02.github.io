@@ -16,7 +16,6 @@ export type LayoutState = {
   sidebarOpen: Ref<boolean>
   canShowSidebar: ComputedRef<boolean>
   showSidebar: ComputedRef<boolean>
-  navCompact: ComputedRef<boolean>
   setNavbarVisible: (visible: boolean) => void
   setFooterVisible: (visible: boolean) => void
   startMobileListener: () => void
@@ -47,7 +46,6 @@ export function createLayoutState(): LayoutState {
 
   const canShowSidebar = computed(() => !isMobile.value)
   const showSidebar = computed(() => canShowSidebar.value && sidebarOpen.value)
-  const navCompact = computed(() => isMobile.value)
 
   return {
     showNavbar,
@@ -56,7 +54,6 @@ export function createLayoutState(): LayoutState {
     sidebarOpen,
     canShowSidebar,
     showSidebar,
-    navCompact,
     setNavbarVisible: (visible) => {
       showNavbar.value = visible
     },

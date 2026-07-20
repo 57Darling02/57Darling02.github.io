@@ -25,8 +25,7 @@
             </button>
         </transition>
         <transition name="el-fade-in">
-            <Toc class="a-card" v-if="showFloatingToc" v-show="isControlPanelOpen"
-                style="height: 40vh;width: 300px;;display: flex;flex-direction: column;padding: 18px;" />
+            <Toc v-if="isFloatingTocOpen" class="a-card floating-toc" />
         </transition>
 
         <div id="control-column">
@@ -56,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useData, onContentUpdated } from 'vitepress'
 import type ThemeConfig from '../types/ThemeConfig'
@@ -105,7 +104,14 @@ if (typeof theme.value.isDark === 'boolean') {
 }
 let firstPaintFrame: number | undefined
 const isControlPanelOpen = ref(false)
+const isFloatingTocOpen = computed(() => showFloatingToc.value && isControlPanelOpen.value)
 const controlRef = ref<HTMLElement | null>(null)
+
+watch(() => page.value.relativePath, () => {
+    isControlPanelOpen.value = false
+}, {
+    flush: 'sync',
+})
 
 function throttle<TArgs extends unknown[]>(fn: (...args: TArgs) => void, delay: number) {
     let lastRun = 0
@@ -171,7 +177,7 @@ const handleScroll = throttle(({ scrollTop }: { scrollTop: number }) => {
         setFooterVisible(false)
     }
     lastScrollY.value = currentY
-}, 150)
+}, 280)
 
 // 控制栏
 const toggleControlPanel = () => {
@@ -354,6 +360,12 @@ onBeforeUnmount(() => {
 
 .page-footer {
     background: var(--vp-c-content-ground);
+}
+
+.floating-toc {
+    height: 40vh;
+    width: 300px;
+    padding: 18px;
 }
 
 #control {

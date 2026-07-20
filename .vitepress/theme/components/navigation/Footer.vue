@@ -126,7 +126,7 @@ $footer-reveal-peek: 8px;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
     &.footer-hidden {
-        transform: translateY(calc(100% + 10px));
+        transform: translateY(calc(100% + 10px - #{$footer-reveal-peek}));
     }
 
     // 齿轮图标旋转动画
@@ -150,12 +150,6 @@ $footer-reveal-peek: 8px;
     // 可选：添加悬停暂停效果
     .gear-icon:hover {
         animation-play-state: paused;
-    }
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .footer.footer-hidden {
-        transform: translateY(calc(100% + 10px - #{$footer-reveal-peek}));
     }
 }
 

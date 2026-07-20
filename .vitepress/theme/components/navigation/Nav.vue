@@ -5,6 +5,13 @@
         @mouseenter="handleNavMouseEnter"
         @mouseleave="handleNavMouseLeave"
     >
+        <button
+            v-if="navPhase === 'hidden'"
+            class="nav-reveal-trigger"
+            type="button"
+            aria-label="显示导航栏"
+            @click="revealNavigation"
+        />
         <div
             id="nav"
             ref="navRef"
@@ -12,59 +19,75 @@
             :aria-hidden="!isNavInteractive ? 'true' : undefined"
         >
             <div id="menu" :inert="!isNavInteractive || undefined">
-            <a class="menu-fitem" href="/" aria-label="首页" @click="handleLinkClick('/', $event)">
-                <span class="menu-fitem-content">
-                    <ThemeIcon name="house" />
-                    <span class="menu-label">首页</span>
-                </span>
-            </a>
-
-            <button v-if="shouldShowMusicPlayer" ref="musicTriggerRef" type="button"
-                :class="['menu-fitem', 'menu-fitem-music', { 'menu-fitem-active': musicPanelVisible }]"
-                :aria-expanded="musicPanelVisible"
-                aria-controls="music-player-panel"
-                aria-label="音乐播放器"
-                @mouseenter="openMusicPanel" @mouseleave="scheduleCloseMusicPanel" @click="handleMusicTriggerClick">
-                <span class="menu-fitem-content">
-                    <ThemeIcon name="disc-3" class="music-icon" :class="{ 'music-icon-rotating': isMusicPlaying }" />
-                    <span class="menu-label">音乐</span>
-                </span>
-            </button>
-
-            <template v-for="item in menuItems" :key="item.label">
-                <button
-                    v-if="item.children?.length"
-                    type="button"
-                    :class="['menu-fitem', { 'menu-fitem-active': menuPanelVisible && activeMenuItem?.label === item.label }]"
-                    :aria-expanded="menuPanelVisible && activeMenuItem?.label === item.label"
-                    aria-controls="menu-panel"
-                    aria-haspopup="menu"
-                    :aria-label="item.label"
-                    @mouseenter="handleMenuTriggerMouseEnter(item, $event)"
-                    @mouseleave="scheduleCloseMenuPanel"
-                    @click="handleMenuTriggerClick(item, $event)"
-                >
+                <a class="menu-fitem" href="/" aria-label="首页" @click="handleLinkClick('/', $event)">
                     <span class="menu-fitem-content">
-                        <ThemeIcon :name="item.icon" :src="item.iconUrl" class="arrow-icon" />
-                        <span class="menu-label">{{ item.label }}</span>
-                    </span>
-                </button>
-                <a
-                    v-else
-                    class="menu-fitem"
-                    :href="item.link || undefined"
-                    :target="getLinkTarget(item.link)"
-                    :rel="getLinkRel(item.link)"
-                    :aria-label="item.label"
-                    :aria-disabled="!item.link || undefined"
-                    @click="handleLinkClick(item.link, $event)"
-                >
-                    <span class="menu-fitem-content">
-                        <ThemeIcon :name="item.icon" :src="item.iconUrl" class="arrow-icon" />
-                        <span class="menu-label">{{ item.label }}</span>
+                        <ThemeIcon name="house" :size="NAV_ICON_SIZE" />
+                        <span class="menu-label">首页</span>
                     </span>
                 </a>
-            </template>
+
+                <button
+                    v-if="shouldShowMusicPlayer"
+                    ref="musicTriggerRef"
+                    type="button"
+                    :class="['menu-fitem', 'menu-fitem-music', { 'menu-fitem-active': musicPanelVisible }]"
+                    :aria-expanded="musicPanelVisible"
+                    aria-controls="music-player-panel"
+                    aria-label="音乐播放器"
+                    @mouseenter="openMusicPanel"
+                    @mouseleave="scheduleCloseMusicPanel"
+                    @click="handleMusicTriggerClick"
+                >
+                    <span class="menu-fitem-content">
+                        <ThemeIcon
+                            name="disc-3"
+                            :size="NAV_ICON_SIZE"
+                            class="music-icon"
+                            :class="{ 'music-icon-rotating': isMusicPlaying }"
+                        />
+                        <span class="menu-label">音乐</span>
+                    </span>
+                </button>
+
+                <template v-for="item in menuItems" :key="item.label">
+                    <button
+                        v-if="item.children?.length"
+                        type="button"
+                        :class="['menu-fitem', 'menu-fitem-menu', { 'menu-fitem-active': menuPanelVisible && activeMenuItem?.label === item.label }]"
+                        :aria-expanded="menuPanelVisible && activeMenuItem?.label === item.label"
+                        aria-controls="menu-panel"
+                        aria-haspopup="menu"
+                        :aria-label="item.label"
+                        @mouseenter="handleMenuTriggerMouseEnter(item, $event)"
+                        @mouseleave="scheduleCloseMenuPanel"
+                        @click="handleMenuTriggerClick(item, $event)"
+                    >
+                        <span class="menu-fitem-content">
+                            <ThemeIcon
+                                :name="item.icon"
+                                :src="item.iconUrl"
+                                :size="NAV_ICON_SIZE"
+                                class="menu-trigger-icon"
+                            />
+                            <span class="menu-label">{{ item.label }}</span>
+                        </span>
+                    </button>
+                    <a
+                        v-else
+                        class="menu-fitem"
+                        :href="item.link || undefined"
+                        :target="getLinkTarget(item.link)"
+                        :rel="getLinkRel(item.link)"
+                        :aria-label="item.label"
+                        :aria-disabled="!item.link || undefined"
+                        @click="handleLinkClick(item.link, $event)"
+                    >
+                        <span class="menu-fitem-content">
+                            <ThemeIcon :name="item.icon" :src="item.iconUrl" :size="NAV_ICON_SIZE" />
+                            <span class="menu-label">{{ item.label }}</span>
+                        </span>
+                    </a>
+                </template>
 
                 <VPNavBarSearch class="menu-fitem menu-fitem-search" />
             </div>
@@ -114,19 +137,20 @@ import ThemeIcon from '../ThemeIcon.vue'
 
 const { theme } = useData<ThemeConfig>()
 const router = useRouter()
-const { showNavbar, navCompact } = useLayoutState()
+const { showNavbar, setNavbarVisible } = useLayoutState()
 const menuItems = computed(() => theme.value.menuItems)
 const APlayerWidget = defineAsyncComponent(() => import('../player/APlayerWidget.vue'))
 
 type NavPhase = 'expanded' | 'compact' | 'hidden'
 
-const COLLAPSE_DURATION = 150
-const COMPACT_SETTLE_DURATION = 60
-const REVEAL_DURATION = 320
+const NAV_ICON_SIZE = 18
+const COLLAPSE_DURATION = 210
+const COMPACT_SETTLE_DURATION = 32
+const REVEAL_DURATION = 240
 
 const navRef = ref<HTMLElement | null>(null)
-const navPhase = ref<NavPhase>(navCompact.value ? 'compact' : 'expanded')
-const isCompact = computed(() => navCompact.value || navPhase.value !== 'expanded')
+const navPhase = ref<NavPhase>('expanded')
+const isCompact = computed(() => navPhase.value !== 'expanded')
 const navHovered = ref(false)
 const menuDropdownRef = ref<DropdownInstance>()
 const menuPanelVisible = ref(false)
@@ -202,17 +226,11 @@ const clearNavPhaseTimer = () => {
     navPhaseTimerTarget = null
 }
 
-const syncNavPhase = (visible: boolean, viewportCompact: boolean) => {
+const syncNavPhase = (visible: boolean) => {
     const previousPhase = navPhase.value
     const pendingTarget = navPhaseTimerTarget
     clearNavPhaseTimer()
     const version = ++navMotionVersion
-
-    if (viewportCompact) {
-        navHovered.value = false
-        navPhase.value = visible ? 'compact' : 'hidden'
-        return
-    }
 
     if (prefersReducedMotion()) {
         navPhase.value = visible ? 'expanded' : 'hidden'
@@ -257,7 +275,10 @@ const syncNavPhase = (visible: boolean, viewportCompact: boolean) => {
 
 const measureLabelWidths = async () => {
     await nextTick()
-    navRef.value?.querySelectorAll<HTMLElement>('.menu-label').forEach((label) => {
+    const nav = navRef.value
+    if (!nav) return
+
+    nav.querySelectorAll<HTMLElement>('.menu-label').forEach((label) => {
         label.style.setProperty('--label-width', `${label.scrollWidth}px`)
     })
 }
@@ -298,15 +319,19 @@ const musicPlayer = computed(() => {
 const shouldShowMusicPlayer = computed(() => musicPlayer.value.enabled && Boolean(musicPlayer.value.url))
 
 const handleMotionPreferenceChange = () => {
-    syncNavPhase(showNavbar.value, navCompact.value)
+    syncNavPhase(showNavbar.value)
 }
 
 const handleNavMouseEnter = () => {
-    if (!navCompact.value) navHovered.value = true
+    navHovered.value = true
 }
 
 const handleNavMouseLeave = () => {
     navHovered.value = false
+}
+
+const revealNavigation = () => {
+    setNavbarVisible(true)
 }
 
 const isModifiedEvent = (event?: MouseEvent) => {
@@ -469,14 +494,12 @@ const onMusicPanelVisibleChange = (visible: boolean) => {
 }
 
 watch(showNavbar, (visible) => {
-    if (visible) return
-    closeMenuPanel()
-    closeMusicPanel()
-    blurNavFocus()
-})
-
-watch([showNavbar, navCompact], ([visible, viewportCompact]) => {
-    syncNavPhase(visible, viewportCompact)
+    if (!visible) {
+        closeMenuPanel()
+        closeMusicPanel()
+        blurNavFocus()
+    }
+    syncNavPhase(visible)
 }, {
     immediate: true,
     flush: 'sync',
@@ -510,6 +533,8 @@ $nav-height: var(--nav-height);
 $border-radius: 50px;
 $nav-gap: 4px;
 $nav-reveal-peek: 8px;
+$nav-collapse-duration: 210ms;
+$nav-transform-duration: 240ms;
 
 #nav-reveal-zone {
     position: fixed;
@@ -524,17 +549,13 @@ $nav-reveal-peek: 8px;
     transform: translateX(-50%);
 
     &.nav-reveal-zone-hidden {
-        height: $nav-gap;
-    }
-
-    @media (min-width: 749px) {
-        &.nav-reveal-zone-hidden {
-            height: $nav-reveal-peek;
-        }
+        height: $nav-reveal-peek;
     }
 }
 
 #nav {
+    --nav-search-compact-size: 35px;
+
     height: calc(#{$nav-height} - #{$nav-gap} * 2);
     position: relative;
     top: $nav-gap;
@@ -550,22 +571,30 @@ $nav-reveal-peek: 8px;
     padding: 0 20px;
     display: flex;
     overflow: hidden;
-    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform $nav-transform-duration cubic-bezier(0.16, 1, 0.3, 1);
 
     &.nav-hidden {
-        transform: translateY(calc(-100% - #{$nav-gap}));
-        transition-duration: 260ms;
+        transform: translateY(calc(-100% - #{$nav-gap} + #{$nav-reveal-peek}));
+        transition-duration: $nav-transform-duration;
         transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
-    }
-
-    @media (min-width: 749px) {
-        &.nav-hidden {
-            transform: translateY(calc(-100% - #{$nav-gap} + #{$nav-reveal-peek}));
-        }
     }
 }
 
-@media (min-width: 749px) {
+.nav-reveal-trigger {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--vp-c-brand);
+        outline-offset: -2px;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
     #nav-reveal-zone.nav-reveal-zone-hidden:hover #nav.nav-hidden {
         transform: translateY(0);
         transition-duration: 180ms;
@@ -574,6 +603,8 @@ $nav-reveal-peek: 8px;
 }
 
 #menu {
+    --nav-item-active-bg: color-mix(in srgb, var(--vp-c-brand) 12%, transparent);
+
     display: flex;
     align-items: center;
     gap: 6px;
@@ -585,15 +616,35 @@ $nav-reveal-peek: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        isolation: isolate;
         line-height: 1;
         padding: 8px 10px;
         border: 0;
+        border-radius: 0.625rem;
         background: transparent;
         color: inherit;
         cursor: pointer;
         font: inherit;
         text-decoration: none;
         user-select: none;
+        transition: color 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .menu-fitem:not(.menu-fitem-search)::before {
+        position: absolute;
+        z-index: 0;
+        inset: 3px 2px;
+        border-radius: inherit;
+        background: var(--nav-item-active-bg);
+        content: '';
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .menu-fitem:focus-visible,
+    .menu-fitem.menu-fitem-active {
+        color: var(--vp-c-brand);
     }
 
     .menu-fitem:focus-visible {
@@ -601,16 +652,20 @@ $nav-reveal-peek: 8px;
         outline-offset: 2px;
     }
 
+    .menu-fitem:not(.menu-fitem-search):is(:focus-visible, .menu-fitem-active)::before {
+        opacity: 1;
+    }
+
     .menu-fitem-content {
         position: relative;
+        z-index: 1;
         font-size: 1rem;
         font-weight: 500;
         white-space: nowrap;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding-bottom: 3px;
-        transition: gap 210ms cubic-bezier(0.16, 1, 0.3, 1);
+        transition: gap $nav-collapse-duration cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .menu-label {
@@ -622,40 +677,25 @@ $nav-reveal-peek: 8px;
         opacity: 1;
         white-space: nowrap;
         transition:
-            width 210ms cubic-bezier(0.16, 1, 0.3, 1),
+            width $nav-collapse-duration cubic-bezier(0.16, 1, 0.3, 1),
             opacity 120ms ease-out 60ms;
     }
 
-    .menu-fitem-content::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -4px;
-        height: 4px;
-        border-radius: 999px;
-        background: linear-gradient(to right, #3498db, #2980b9);
-        transform: scaleX(0);
-        transform-origin: left center;
-        transition: transform 0.25s ease;
-        pointer-events: none;
+    .menu-trigger-icon {
+        transform-origin: center;
+        transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .menu-fitem:hover .menu-fitem-content::after,
-    .menu-fitem.menu-fitem-active .menu-fitem-content::after {
-        transform: scaleX(1);
-    }
-
-    .arrow-icon {
-        transition: transform 0.25s ease;
-    }
-
-    .menu-fitem.menu-fitem-active .arrow-icon {
+    .menu-fitem.menu-fitem-active .menu-trigger-icon {
         transform: rotate(180deg);
     }
 
     .menu-fitem-music {
         cursor: pointer;
+    }
+
+    .menu-fitem-menu {
+        order: 1;
     }
 
     .music-icon {
@@ -668,61 +708,103 @@ $nav-reveal-peek: 8px;
 
     .menu-fitem-search {
         align-self: center;
-        flex: 0 0 auto;
+        flex: 0 1 clamp(8.5rem, 13vw, 12.5rem);
+        min-inline-size: 0;
         padding: 0;
+        transition: flex-basis $nav-collapse-duration cubic-bezier(0.16, 1, 0.3, 1);
 
         :deep(.VPNavBarSearchButton) {
+            box-sizing: border-box;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            width: 35px;
-            height: 35px;
-            padding: 0;
-            border: 0;
-            border-radius: 50%;
-            background: transparent;
-            color: inherit;
+            justify-content: flex-start;
+            gap: 8px;
+            inline-size: 100%;
+            block-size: var(--nav-search-compact-size);
+            min-inline-size: 0;
+            overflow: hidden;
+            padding: 0 10px;
+            border: 1px solid color-mix(in srgb, var(--vp-c-divider) 72%, transparent);
+            border-radius: 0.625rem;
+            background: color-mix(in srgb, var(--vp-c-bg-alt) 72%, transparent);
+            color: var(--vp-c-text-2);
             cursor: pointer;
             font: inherit;
-            font-size: 1rem;
+            font-size: 0.875rem;
             line-height: 1;
+            transition:
+                background-color 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                color 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                padding $nav-collapse-duration cubic-bezier(0.4, 0, 1, 1),
+                border-radius $nav-collapse-duration cubic-bezier(0.4, 0, 1, 1);
         }
 
-        :deep(.VPNavBarSearchButton .text),
-        :deep(.VPNavBarSearchButton .keys) {
-            display: none;
+        :deep(.VPNavBarSearchButton .text) {
+            display: block;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         :deep(.VPNavBarSearchButton .vpi-search) {
-            display: block;
-            margin-bottom: 3px;
-            transform-origin: center;
-            transition: transform 0.2s ease;
-        }
-
-        :deep(.VPNavBarSearchButton:hover .vpi-search) {
-            transform: scale(1.14);
+            flex: 0 0 auto;
+            margin: 0;
+            font-size: 18px;
         }
 
         :deep(.VPNavBarSearchButton:focus-visible) {
+            background-color: var(--nav-item-active-bg);
+            color: var(--vp-c-brand);
             outline: 2px solid var(--vp-c-brand);
             outline-offset: 2px;
         }
     }
 }
 
+@media (hover: hover) and (pointer: fine) {
+    #menu .menu-fitem:not(.menu-fitem-search):hover {
+        color: var(--vp-c-brand);
+    }
+
+    #menu .menu-fitem:not(.menu-fitem-search):hover::before {
+        opacity: 1;
+    }
+
+    #menu .menu-fitem-search :deep(.VPNavBarSearchButton:hover) {
+        background-color: var(--nav-item-active-bg);
+        color: var(--vp-c-brand);
+    }
+}
+
 #nav.nav-compact {
     #menu .menu-fitem-content {
         gap: 0;
-        transition: gap 150ms cubic-bezier(0.4, 0, 1, 1);
+        transition: gap $nav-collapse-duration cubic-bezier(0.4, 0, 1, 1);
     }
 
     #menu .menu-label {
         width: 0;
         opacity: 0;
         transition:
-            width 150ms cubic-bezier(0.4, 0, 1, 1),
+            width $nav-collapse-duration cubic-bezier(0.4, 0, 1, 1),
             opacity 80ms ease-in;
+    }
+
+    #menu .menu-fitem-search {
+        flex: 0 0 var(--nav-search-compact-size);
+
+        :deep(.VPNavBarSearchButton) {
+            justify-content: center;
+            gap: 0;
+            padding: 0;
+        }
+
+        :deep(.VPNavBarSearchButton .text),
+        :deep(.VPNavBarSearchButton .keys) {
+            display: none;
+        }
     }
 }
 
@@ -766,8 +848,13 @@ $nav-reveal-peek: 8px;
     #nav,
     #nav.nav-hidden,
     #nav.nav-hidden:hover,
+    #menu .menu-fitem,
+    #menu .menu-fitem::before,
     #menu .menu-fitem-content,
     #menu .menu-label,
+    #menu .menu-trigger-icon,
+    #menu .menu-fitem-search :deep(.VPNavBarSearchButton),
+    #menu .menu-fitem-search :deep(.VPNavBarSearchButton .text),
     #nav.nav-compact #menu .menu-fitem-content,
     #nav.nav-compact #menu .menu-label {
         transition: none;
@@ -775,8 +862,34 @@ $nav-reveal-peek: 8px;
 }
 
 @media (max-width: 748px) {
+    .menu-panel-shell {
+        inline-size: min(125px, calc(100vw - 2rem));
+    }
+
+    #nav {
+        max-inline-size: calc(100vw - 16px);
+    }
+
     #nav #menu .menu-fitem-content {
         gap: 0;
+    }
+
+    #nav.nav-compact #menu .menu-fitem-search :deep(.VPNavBarSearchButton .text) {
+        display: block;
+        max-inline-size: 0;
+        opacity: 0;
+        transition:
+            max-inline-size 100ms cubic-bezier(0.4, 0, 1, 1),
+            opacity 80ms ease-in;
+    }
+
+    #nav:not(.nav-compact) #menu .menu-fitem-search :deep(.VPNavBarSearchButton .text) {
+        display: block;
+        max-inline-size: 10em;
+        opacity: 1;
+        transition:
+            max-inline-size 120ms cubic-bezier(0.16, 1, 0.3, 1) 80ms,
+            opacity 120ms ease-out 120ms;
     }
 
     #nav #menu .menu-label {
