@@ -24,17 +24,19 @@ const fontAwesomeHead: HeadConfig[] = hasFontAwesomeIcons(myconfig)
     }]]
   : []
 const rewriteTargets = new Map<string, string>();
+const postsDir = path.resolve(process.cwd(), 'posts')
 
 function rewritePostPath(id: string) {
   if (!id.startsWith('posts/') || !id.endsWith('.md')) return id
 
-  const layout = getMarkdownLayout(id)
-  if (layout && layout !== 'doc') {
-    return registerRewriteTarget(id, getStandalonePageTarget(id))
-  }
+  return registerRewriteTarget(id, getPostRewriteTarget(id))
+}
 
-  const target = `p/${shortHash(id)}.md`
-  return registerRewriteTarget(id, target)
+function getPostRewriteTarget(id: string) {
+  const layout = getMarkdownLayout(id)
+  return layout && layout !== 'doc'
+    ? getStandalonePageTarget(id)
+    : `p/${shortHash(id)}.md`
 }
 
 function registerRewriteTarget(id: string, target: string) {
@@ -68,6 +70,50 @@ function getMarkdownLayout(id: string) {
     ? String((frontmatter as Record<string, unknown>).layout || '').trim()
     : ''
 }
+
+function resolvePostLink(href: string, sourceFile: string) {
+  const suffixStart = href.search(/[?#]/)
+  const hrefPath = suffixStart === -1 ? href : href.slice(0, suffixStart)
+  if (!hrefPath || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(hrefPath)) return
+
+  const decodedPath = decodeLinkPath(hrefPath)
+  const targetPath = hrefPath.startsWith('/')
+    ? path.resolve(postsDir, decodedPath.slice(1))
+    : path.resolve(path.dirname(sourceFile), decodedPath)
+  const markdownPath = findMarkdownTarget(targetPath)
+  if (!markdownPath) return
+
+  const relativePath = path.relative(postsDir, markdownPath)
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) return
+
+  const id = `posts/${relativePath.split(path.sep).join('/')}`
+  const target = getPostRewriteTarget(id)
+  const route = target.replace(/(?:^|\/)index\.md$/, '$1').replace(/\.md$/, '')
+  return `/${route}${href.slice(hrefPath.length)}`
+}
+
+function decodeLinkPath(value: string) {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+function findMarkdownTarget(filePath: string) {
+  const candidates = filePath.endsWith('.md')
+    ? [filePath]
+    : [`${filePath}.md`, path.join(filePath, 'index.md')]
+
+  return candidates.find(candidate => {
+    try {
+      return fs.statSync(candidate).isFile()
+    } catch {
+      return false
+    }
+  })
+}
+
 export default defineConfig<ThemeConfig>({
   ...createSeoConfig(myconfig),
   themeConfig: myconfig,
@@ -101,6 +147,22 @@ export default defineConfig<ThemeConfig>({
     image: {
       // 默认禁用；设置为 true 可为所有图片启用懒加载。
       lazyLoading: true
+    },
+    config(md) {
+      md.core.ruler.after('inline', 'rewrite-post-links', state => {
+        const sourceFile = state.env.realPath
+        if (typeof sourceFile !== 'string') return
+
+        for (const token of state.tokens) {
+          for (const child of token.children ?? []) {
+            if (child.type !== 'link_open') continue
+
+            const href = child.attrGet('href')
+            const target = href && resolvePostLink(href, sourceFile)
+            if (target) child.attrSet('href', target)
+          }
+        }
+      })
     }
   },
   transformHtml(code) {
