@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 57Darling02/VitePress_butterfly
-          ref: e15fea5
+          ref: e15fea50688b468644f3e84d579023757f412859
           path: theme
       - name: Install pnpm
         if: steps.readiness.outputs.ready == 'true'
